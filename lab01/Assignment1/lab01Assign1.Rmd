@@ -1,0 +1,206 @@
+---
+title: "lab01_Assignment1"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r lib, include=FALSE}
+library(kknn)
+library(caret)
+library(shipunov)
+library(tidyverse)
+```
+
+## Assignment 1. Handwritten digit recognition with Knearest neighbors.
+
+1. Import the data into R and divide it into training, validation and test sets(50%/25%/25%) by using the partitioning principle specified in the lecture slides.
+
+
+```{r 1.1 partition, include=FALSE}
+optdigits <- read.csv("D:/Program/Git/Repo/732A99-MachineLearning/lab01/Assignment1/optdigits.csv", header = FALSE)
+
+set.seed(24601)
+
+n <- nrow(optdigits)
+
+r_train <- sample(1:n, floor(n*0.5))
+train <-  optdigits[r_train, ]
+
+r_nont <- setdiff(1:n, r_train)
+r_valid <- sample(r_nont, floor(n*0.25))
+valid <- optdigits[r_valid, ]
+ 
+test <- optdigits[setdiff(r_nont, r_valid), ]
+```
+
+```{r 1.1 showdim}
+dim(train)
+dim(valid)
+dim(test)
+```
+
+2.Use training data to fit 30-nearest neighbor classifier with function kknn() and
+kernel=”rectangular” from package kknn and estimate  
+
+• Confusion matrices for the training and test data (use table())  
+
+• Misclassification errors for the training and test data  
+
+Comment on the quality of predictions for different digits and on the overall prediction quality.
+
+- train:
+
+```{r 1.2 train}
+optdigits_kknn_train_k30 <- kknn(as.factor(V65)~., train, train, k=30, kernel="rectangular")
+fit <- fitted(optdigits_kknn_train_k30)
+Misclass( fit, train$V65)
+```
+
+- test:
+
+```{r 1.2 test}
+optdigits_kknn_test_k30 <- kknn(as.factor(V65)~., train, test, k=30, kernel="rectangular")
+fit <- fitted(optdigits_kknn_test_k30)
+Misclass( fit, test$V65)
+```
+
+- for 0, 2, 6, 7 : best quality, at most 2.2% misclassification error for both train and test
+- for 4, 9 : worst quality, at least 8.5% misclassification error for both train and test
+
+- overall prediction quality: 4.8% overall misclassification error for train and 4.5% for test. Acceptable error rate(as a lab assignment) and differences.
+
+
+3. Find any 2 cases of digit “8” in the training data which were easiest to classify
+and 3 cases that were hardest to classify (i.e. having highest and lowest
+probabilities of the correct class). Reshape features for each of these cases as
+matrix 8x8 and visualize the corresponding digits (by using e.g. heatmap()
+function with parameters Colv=NA and Rowv=NA) and comment on whether
+these cases seem to be hard or easy to recognize visually.
+
+```{r 1.3 find 8s}
+originID <- which( train$V65 == 8)
+# original id in train set
+
+prob_train_k30 <- cbind(ID = originID,
+                        optdigits_kknn_train_k30$prob[originID,]
+                        ) %>% 
+  as.data.frame() %>% 
+  arrange(`8`)
+#sort out the probabilities of observation 8 and arrange increasingly
+
+
+head(prob_train_k30, 3L)
+# hardest 427, 1480, 1033
+
+tail(prob_train_k30, 2L)
+# easiest 1867, 1895
+
+
+```
+
+```{r 1.3 plot 8s, out.width = "50%", out.height = "50%"}
+easy <- c(1867, 1895)
+hard <- c(427, 1480, 1033)
+
+for (i in c(easy, hard)) {
+  if (any(i == easy) ) {
+    title <- paste("Easy: No.", i)
+  }else {
+    title <- paste("Hard: No.", i)
+  }
+  
+  heatmap(
+    matrix(as.numeric(train[i,-65]), nrow = 8, ncol = 8, byrow = TRUE),
+    Colv = NA, Rowv = NA, main = title
+    )
+}
+```
+
+- visually the heatmap gives human the same difficulty to recognize as to our model , its clear and easy to recognize for human for those easiest-to-classify figures and similarly it's hard for human to recognize for the hardest ones.
+
+4. Fit a K-nearest neighbor classifiers to the training data for different values of K =
+1,2, … , 30 and plot the dependence of the training and validation misclassification
+errors on the value of K (in the same plot). How does the model complexity
+change when K increases and how does it affect the training and validation errors? Report the optimal K according to this plot. Finally, estimate the test error
+for the model having the optimal K, compare it with the training and validation
+errors and make necessary conclusions about the model quality.
+
+```{r 1.4}
+Err_train <- vector()
+Err_valid <- vector()
+
+for (i in 1:30) {
+  optdig_kknn_train_1loop30 <- kknn(as.factor(V65)~., train, train, k = i ,kernel = "rectangular")
+  fit <- fitted(optdig_kknn_train_1loop30)
+  cfsMtx <- table(fit, train$V65)
+  Err_train[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
+  
+  
+  optdig_kknn_valid_1loop30 <- kknn(as.factor(V65)~., train, valid, k = i ,kernel = "rectangular")
+  fit <- fitted(optdig_kknn_valid_1loop30)
+  cfsMtx <- table(fit, valid$V65)
+  Err_valid[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
+}
+
+
+
+plot(Err_train, main = "train: black   valid: red", ylim = c(0, 0.06), ylab = "errors(%)", xlab = "K")
+points(Err_valid, col = "red")
+
+```
+
+- From this plot, we can learn that when K value is close to zero, the misclassification
+errors of training set should not be taken into consideration. e.g., when K == 1, the 1-nearest-neighbour is exactly each point itself, and of course there will be no misclassification errors.  
+For this reason, K = 4 may possibly be the optimal value.
+
+- Generally , the misclassification errors rises when K rises, and the errors of train itself is always lower than valid
+
+```{r test K4}
+optdigits_kknn_test_k4 <- kknn(as.factor(V65)~., train, test, k = 4, kernel="rectangular")
+fit <- fitted(optdigits_kknn_test_k4)
+Misclass( fit, test$V65)
+```
+
+```{r error rate}
+Err_train[4]
+Err_valid[4]
+```
+
+- When K = 3, the misclassification error rate of training set is 1.67%, and 3.56% for valid, 2.3% for test
+
+5. Fit K-nearest neighbor classifiers to the training data for different values of K =
+1,2, … , 30, compute the error for the validation data as cross-entropy ( when
+computing log of probabilities add a small constant within log, e.g. 1e-15, to
+avoid numerical problems) and plot the dependence of the validation error on the
+value of K. What is the optimal K value here? Assuming that response has
+multinomial distribution, why might the cross-entropy be a more suitable choice
+of the error function than the misclassification error for this problem?
+
+
+```{r 1.5}
+H <- 0
+
+for (i in 1:30) {
+  optdigits_kknn_valid_q5 <- kknn(as.factor(V65)~., train,valid, k = i ,kernel = "rectangular")
+  fit <- fitted(optdigits_kknn_valid_q5)
+  prob_valid <- predict(optdigits_kknn_valid_q5, valid, type = 'prob')
+
+  H[i] <- 0
+  for (j in 1:dim(valid)[1]) {
+    g <- prob_valid[j, 1 + valid[j, 65]]
+    names(g) <- NULL
+
+    H[i] <- H[i] + (-log(g + exp(-15)))
+  }
+}
+
+plot(H, xlab = "K", ylab = "Cross-entropy")
+```
+
+- K == 10 is the optimal value due to the plot.  
+Misclassification error we are calculating consider things purely under a binary context, i.e., the prediction is correct or is not correct. While cross-entropy also take the possibility into consideration. It not only affected by how wrongly you are, but also affected by how wrongly your wrongs are. An almost correct prediction will considered the same as a completely wrong prediction under misclassification error, but cross-entropy can show the differences. This difference can be exemplified when assuming that response has multinomial distribution, for $1 - g(x_i)$ may differs a lot from $g_{y_i}(x_i)$.
