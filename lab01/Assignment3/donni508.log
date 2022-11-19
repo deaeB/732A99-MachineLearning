@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.11.9)  19 NOV 2022 21:08
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.11.9)  19 NOV 2022 23:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -608,7 +608,7 @@ ine 522.
 Here is how much of TeX's memory you used:
  13870 strings out of 475380
  220260 string characters out of 2786630
- 603147 words of memory out of 3000000
+ 603192 words of memory out of 3000000
  34926 multiletter control sequences out of 15000+600000
  512797 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -627,7 +627,7 @@ TeX/fonts/type1/public/lm/lmr17.pfb><D:/Program/LaTeX/MiKTeX/fonts/type1/public
 m/LaTeX/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><D:/Program/LaTeX/MiKTeX/fonts/
 type1/public/lm/lmsy7.pfb><D:/Program/LaTeX/MiKTeX/fonts/type1/public/lm/lmtt10
 .pfb><D:/Program/LaTeX/MiKTeX/fonts/type1/public/lm/lmtti10.pfb>
-Output written on donni508.pdf (9 pages, 512029 bytes).
+Output written on donni508.pdf (9 pages, 512858 bytes).
 PDF statistics:
  176 PDF objects out of 1000 (max. 8388607)
  21 named destinations out of 1000 (max. 500000)

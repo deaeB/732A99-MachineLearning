@@ -1,7 +1,6 @@
 ---
-title: "Lab1_assignment2"
-author: "Jin Yan"
-date: "2022-11-18"
+title: "Lab01 Assignment2"
+
 output:
   pdf_document: default
   html_document: default

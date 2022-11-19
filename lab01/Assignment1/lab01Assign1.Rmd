@@ -1,6 +1,6 @@
 ---
-title: "lab01_Assignment1"
-Author: "Group 30"
+title: "Lab01 Assignment1"
+author: "Group 20"
 output:
   pdf_document: default
   html_document: default
@@ -9,6 +9,12 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+**Statement Of Contribution:**
+  
+Assignment 1: NI Dongwei  
+Assignment 2: YAN Jin  
+Assignment 3: Collins Klinsmann Osondu, YAN Jin, NI Dongwei  
 
 ```{r lib, include=FALSE}
 library(kknn)
@@ -24,7 +30,7 @@ library(ggplot2)
 
 
 ```{r 1.1 partition, include=FALSE}
-optdigits <- read.csv("D:/Program/Git/Repo/732A99-MachineLearning/lab01/Assignment1/optdigits.csv", header = FALSE)
+optdigits <- read.csv("optdigits.csv", header = FALSE)
 
 set.seed(24601)
 
@@ -140,7 +146,7 @@ Err_valid <- vector()
 
 for (i in 1:30) {
   optdig_kknn_train_1loop30 <- kknn(as.factor(V65)~., train, train, k = i ,
-                                    = "rectangular")
+                                    kernel = "rectangular")
   fit <- fitted(optdig_kknn_train_1loop30)
   cfsMtx <- table(fit, train$V65)
   Err_train[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
@@ -155,7 +161,8 @@ for (i in 1:30) {
 
 
 
-plot(Err_train, main = "train: black   valid: red", ylim = c(0, 0.06), ylab = "errors(%)", xlab = "K")
+plot(Err_train, main = "train: black   valid: red", ylim = c(0, 0.06),
+     ylab = "errors(%)", xlab = "K")
 points(Err_valid, col = "red")
 
 ```
@@ -211,4 +218,4 @@ plot(H, xlab = "K", ylab = "Cross-entropy")
 ```
 
 - K == 10 is the optimal value due to the plot.  
-Misclassification error we are calculating consider things purely under a binary context, i.e., the prediction is correct or is not correct. While cross-entropy also take the possibility into consideration. It not only affected by how wrongly you are, but also affected by how wrongly your wrongs are. An almost correct prediction will considered the same as a completely wrong prediction under misclassification error, but cross-entropy can show the differences. This difference can be exemplified when assuming that response has multinomial distribution, for $1 - g(x_i)$ may differs a lot from $g_{y_i}(x_i)$.
+Misclassification error we are calculating consider things purely under a binary context, i.e., the prediction is correct or is not correct. While cross-entropy also take the possibility into consideration. It not only affected by how wrongly you are, but also affected by how wrongly your wrongs are. An almost correct prediction will considered the same as a completely wrong prediction under misclassification error, but cross-entropy can show the differences.
