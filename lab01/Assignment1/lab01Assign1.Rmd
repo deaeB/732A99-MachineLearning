@@ -72,7 +72,7 @@ Misclass( fit, test$V65)
 - for 0, 2, 6, 7 : best quality, at most 2.2% misclassification error for both train and test
 - for 4, 9 : worst quality, at least 8.5% misclassification error for both train and test
 
-- overall prediction quality: 4.8% overall misclassification error for train and 4.5% for test. Acceptable error rate(as a lab assignment) and differences.
+- overall prediction quality: 4.8% mean misclassification error for train and 4.5% for test. Acceptable error rate(as a lab assignment) and differences.
 
 
 3. Find any 2 cases of digit “8” in the training data which were easiest to classify
