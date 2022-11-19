@@ -83,12 +83,16 @@ ggplot(data = train_q1, aes(x = X8, y = X2, colour = X10)) +
 ```
 
 ```{r 3.3}
-slope <- coef(glm_diabete)[2]/(-coef(glm_diabete)[3])
-intercept <- coef(glm_diabete)[1]/(-coef(glm_diabete)[3]) 
+theta <- coef(glm_diabete)
+#theta1 + theta2 x1 + theta3 x2  == 0.5
+
+slope <- (-theta[2]) / theta[3]
+intercept <- (0.5 - theta[1] ) / (theta[3]) 
 
 ggplot(data = train_q1, aes(x = X8, y = X2, colour = X10)) + 
   geom_point() + 
-  geom_abline(slope = slope + 0.15, intercept = intercept - 18.5) +
+  geom_abline(slope = slope, intercept = intercept) +
+  #geom_abline(slope = slope + 0.15, intercept = intercept - 18.5) +
   labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)" )
 
 
