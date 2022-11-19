@@ -12,7 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Assignment 3. Logistic regression and basis function expansion
 The data file **pima-indians-diabetes.csv** contains information about the onset of
 diabetes within 5 years in Pima Indians given medical details. The variables are (in
-the same order as in the dataset):  
+the same order as in the dataset):
+
 1. Number of times pregnant.  
 2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.  
 3. Diastolic blood pressure (mm Hg).  
@@ -29,14 +30,15 @@ to classify by a standard logistic regression model that uses these two variable
 features? Motivate your answer.  
 
 
-```{r 3.1, include=FALSE}
+```{r library, include=FALSE}
 library(tidyverse)
 library(ggplot2)
-
+library(shipunov)
 ```
-```{r 3.1}
+```{r 3.1, include=FALSE}
 
 data_PIdiabetes <- read.csv("D:/Program/Git/Repo/732A99-MachineLearning/lab01/Assignment3/pima-indians-diabetes.csv", col.names = c(1:9))
+# dont forget changing the path
 
 data_PIdiabetes$X9 <- factor(data_PIdiabetes$X9)
 
@@ -44,6 +46,9 @@ ggplot(data = data_PIdiabetes, aes(x = X8, y = X2, colour = X9)) +
   geom_point() + 
   labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Diabetes (0=no or 1=yes)" )
 
+```
+```{r 3.1 comment}
+# data_PIdiabetes <- read.csv("pima-indians-diabetes.csv")
 ```
 
 - Yes! Motivation: Looking at the plot, one can see that the plasma glucose concentration
@@ -77,6 +82,15 @@ test <- data_PIdiabetes[setdiff(r_nont, r_valid), ]
 
 ```
 
+- Logistic regression analysis belongs to the class of generalized linear models.
+In R generalized linear models are handled by the glm() function. The function is
+written as glm(response ~ predictor, family = binomial(link = "logit"), data).
+Please note that logit is the default for binomial; thus, we do not have to type it explicitly.
+The glm() function returns a model object, therefore we may apply extractor functions, such as summary(),
+fitted() or predict, among others, on it. However, please note that the output numbers are on the logit scale.
+To actually predict probabilities we need to provide the predict() function an
+additional argument type = "response"
+
 ```{r 3.2 glm}
 # 2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.
 # 8. Age (years).
@@ -91,14 +105,20 @@ fit <- ifelse(fitted(glm_diabete) >= 0.5, 1, 0)
 ```{r 3.2 probabilistic equation}
 glm_diabete$coefficients
 ```
-
-- when r = 0.5, we have
-$$\cfrac{1}{1 + e^{-\theta^T x}} = 0.5$$
-then
+- we have
+$$g(x) = \cfrac{1}{1 + e^{-\theta^T x}} $$
+and use coefficients we got:
+$$g(x) = \cfrac{1}{1 + e^{-(-5.89785793 + 0.03558250x_1 + 0.02450157x_2)}} $$
+while $x_1$ = Plasma glucose concentration and $x_2$ = age.
 
 ```{r 3.2 misclassification&plot}
 
-Misclass(fit, data_PIdiabetes$X9)
+tq1 <- table(fit, data_PIdiabetes$X9)
+tq1
+# confusion matrix
+1 - (sum(diag(tq1)) / sum(tq1))
+# misclassification error
+
 
 data_PIdiabetes_q1 <- data_PIdiabetes
 data_PIdiabetes_q1$X10 <- factor(fit)
@@ -110,6 +130,22 @@ ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) +
 
 ```
 
+- From the glm model, Both Plasma glucose and Age have a significant influence on Diabetes. From the results of this classification, we can see that our misclassification error is about 26.6%. This is not too bad I think  
+Just as seen with the original plot earlier, the plot with the predicted Diabetes also depits that
+level-1 Diabetes have more plasma glucose compare to level-0 group
+
+
+3.Use the model estimated in step 2 to a) report the equation of the decision
+boundary between the two classes b) add a curve showing this boundary to the
+scatter plot in step 2. Comment whether the decision boundary seems to catch the
+data distribution well.
+
+- when r = 0.5, we have
+$$\cfrac{1}{1 + e^{-\theta^T x}} = 0.5$$
+then we have $\theta^T x = 0$  , i.e. $\theta_0 + \theta_1x_1 + \theta_2x_2 =0$  ($x_1: concentration, x_2: age$)  
+thus $slope = \cfrac{-\theta_2}{\theta_1}$, $intercept = \cfrac{-\theta_0}{\theta_1}$
+
+
 ```{r 3.3}
 theta <- coef(glm_diabete)
 
@@ -120,13 +156,25 @@ ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) +
   geom_point() + 
   geom_abline(slope = slope, intercept = intercept) +
   
-  labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)" )
+  labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)")
 
 
 ```
+
+4. Make same kind of plots as in step 2 but use thresholds r = 0.2 and r = 0.8. By
+using these plots, comment on what happens with the prediction when 𝑟𝑟 value
+changes.
+
+
 ```{r 3.4 r0.2}
 fit_r02 <- ifelse(fitted(glm_diabete) >= 0.2, 1, 0)
-Misclass(fit_r02, data_PIdiabetes$X9)
+
+tr02 <- table(fit_r02, data_PIdiabetes$X9)
+tr02
+#confusion matrix
+1 - (sum(diag(tr02)) / sum(tr02))
+#misclassification error
+
 
 data_PIdiabetes_r02 <- data_PIdiabetes
 data_PIdiabetes_r02$X10 <- factor(fit_r02)
@@ -138,13 +186,20 @@ ggplot(data = data_PIdiabetes_r02, aes(x = X8, y = X2, colour = X10)) +
   geom_point() + 
   geom_abline(slope = slope, intercept = intercept) +
   
-  labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)" )
+  labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)", title = "r = 0.2" )
 
 ```
+
 ```{r 3.4 r0.8}
 
 fit_r08 <- ifelse(fitted(glm_diabete) >= 0.8, 1, 0)
 Misclass(fit_r08, data_PIdiabetes$X9)
+
+tr08 <- table(fit_r08, data_PIdiabetes$X9)
+tr08
+#confusion matrix
+1 - (sum(diag(tr08)) / sum(tr08))
+#misclassification error
 
 data_PIdiabetes_r08 <- data_PIdiabetes
 data_PIdiabetes_r08$X10 <- factor(fit_r08)
@@ -156,10 +211,20 @@ ggplot(data = data_PIdiabetes_r08, aes(x = X8, y = X2, colour = X10)) +
   geom_point() + 
   geom_abline(slope = slope, intercept = intercept) +
   
-  labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)" )
+  labs(x = "Age (years)", y = "Plasma glucose concentration", colour  = "Predicted Diabetes (0=no or 1=yes)", title = "r = 0.8" )
 
 
 ```
+
+
+5. Perform a basis function expansion trick by computing new features $z_1 = x_1^4, z_2 = x_1^3x_2^1, z_3 = x_1^2x_2^2, z_4 = x_1^1x_2^3, z_5 = x_2^4$, adding them to the data set and
+then computing a logistic regression model with 𝑦𝑦 as target and
+$x_1, x_2, z_1, …,z_5$ as features. Create a scatterplot of the same kind as in step 2
+for this model and compute the training misclassification rate. What can you
+say about the quality of this model compared to the previous logistic
+regression model? How have the basis expansion trick affected the shape of
+the decision boundary and the prediction accuracy?
+
 
 ```{r 3.5}
 data_PIdiabetes_q5 <-  data_PIdiabetes %>%  select(c(X2,X8,X9))
@@ -178,7 +243,11 @@ glm_diabete_q5 <- glm(X9 ~ X2 + X8 + Z1 + Z2 + Z3 + Z4 + Z5, data_PIdiabetes_q5,
 
 fit <- ifelse(fitted(glm_diabete) >= 0.5, 1, 0)
 
-Misclass(fit, data_PIdiabetes_q5$X9)
+tq5 <- table(fit, data_PIdiabetes_q5$X9)
+tq5
+# confusion matrix
+1 - (sum(diag(tq5)) / sum(tq5))
+# misclassification error
 
 data_PIdiabetes_q5$X10 <- factor(fit)
 
