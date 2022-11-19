@@ -54,6 +54,14 @@ By comparison we found that as the value of the $\lambda$ increases, the value o
 
 
 ## Appendix
+```{r include=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lattice)
+library(caret)
+```
+
 
 ```{r}
 my_data = read.csv("parkinsons.csv")
@@ -63,11 +71,7 @@ id = sample(1:n, floor(n*0.6))
 train = my_data[id,]
 test = my_data[-id,]
 
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(lattice)
-library(caret)
+
 scaler = preProcess(train)
 trainS = predict(scaler, train)
 testS = predict(scaler, test)

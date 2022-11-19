@@ -1,5 +1,6 @@
 ---
 title: "lab01_Assignment1"
+Author: "Group 30"
 output:
   pdf_document: default
   html_document: default
@@ -14,6 +15,7 @@ library(kknn)
 library(caret)
 library(shipunov)
 library(tidyverse)
+library(ggplot2)
 ```
 
 ## Assignment 1. Handwritten digit recognition with Knearest neighbors.
@@ -56,7 +58,8 @@ Comment on the quality of predictions for different digits and on the overall pr
 - train:
 
 ```{r 1.2 train}
-optdigits_kknn_train_k30 <- kknn(as.factor(V65)~., train, train, k=30, kernel="rectangular")
+optdigits_kknn_train_k30 <- kknn(as.factor(V65)~., train, train, k=30,
+                                 kernel="rectangular")
 fit <- fitted(optdigits_kknn_train_k30)
 Misclass( fit, train$V65)
 ```
@@ -64,7 +67,8 @@ Misclass( fit, train$V65)
 - test:
 
 ```{r 1.2 test}
-optdigits_kknn_test_k30 <- kknn(as.factor(V65)~., train, test, k=30, kernel="rectangular")
+optdigits_kknn_test_k30 <- kknn(as.factor(V65)~., train, test, k=30,
+                                kernel="rectangular")
 fit <- fitted(optdigits_kknn_test_k30)
 Misclass( fit, test$V65)
 ```
@@ -135,13 +139,15 @@ Err_train <- vector()
 Err_valid <- vector()
 
 for (i in 1:30) {
-  optdig_kknn_train_1loop30 <- kknn(as.factor(V65)~., train, train, k = i ,kernel = "rectangular")
+  optdig_kknn_train_1loop30 <- kknn(as.factor(V65)~., train, train, k = i ,
+                                    = "rectangular")
   fit <- fitted(optdig_kknn_train_1loop30)
   cfsMtx <- table(fit, train$V65)
   Err_train[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
   
   
-  optdig_kknn_valid_1loop30 <- kknn(as.factor(V65)~., train, valid, k = i ,kernel = "rectangular")
+  optdig_kknn_valid_1loop30 <- kknn(as.factor(V65)~., train, valid, k = i ,
+                                    kernel = "rectangular")
   fit <- fitted(optdig_kknn_valid_1loop30)
   cfsMtx <- table(fit, valid$V65)
   Err_valid[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
@@ -161,7 +167,8 @@ For this reason, K = 4 may possibly be the optimal value.
 - Generally , the misclassification errors rises when K rises, and the errors of train itself is always lower than valid
 
 ```{r test K4}
-optdigits_kknn_test_k4 <- kknn(as.factor(V65)~., train, test, k = 4, kernel="rectangular")
+optdigits_kknn_test_k4 <- kknn(as.factor(V65)~., train, test, k = 4,
+                               kernel="rectangular")
 fit <- fitted(optdigits_kknn_test_k4)
 Misclass( fit, test$V65)
 ```
@@ -186,7 +193,8 @@ of the error function than the misclassification error for this problem?
 H <- 0
 
 for (i in 1:30) {
-  optdigits_kknn_valid_q5 <- kknn(as.factor(V65)~., train,valid, k = i ,kernel = "rectangular")
+  optdigits_kknn_valid_q5 <- kknn(as.factor(V65)~., train,valid, k = i ,
+                                  kernel = "rectangular")
   fit <- fitted(optdigits_kknn_valid_q5)
   prob_valid <- predict(optdigits_kknn_valid_q5, valid, type = 'prob')
 
