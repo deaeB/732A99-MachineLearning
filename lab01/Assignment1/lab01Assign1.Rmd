@@ -29,7 +29,7 @@ library(ggplot2)
 1. Import the data into R and divide it into training, validation and test sets(50%/25%/25%) by using the partitioning principle specified in the lecture slides.
 
 
-```{r 1.1 partition, include=FALSE}
+```{r 1.1 partition, echo=TRUE}
 optdigits <- read.csv("optdigits.csv", header = FALSE)
 
 set.seed(24601)
@@ -185,7 +185,7 @@ Err_train[4]
 Err_valid[4]
 ```
 
-- When K = 3, the misclassification error rate of training set is 1.67%, and 3.56% for valid, 2.3% for test
+- When K = 4, the misclassification error rate of training set is 1.67%, and 3.56% for valid, 2.3% for test
 
 5. Fit K-nearest neighbor classifiers to the training data for different values of K =
 1,2, … , 30, compute the error for the validation data as cross-entropy ( when
@@ -203,7 +203,7 @@ for (i in 1:30) {
   optdigits_kknn_valid_q5 <- kknn(as.factor(V65)~., train,valid, k = i ,
                                   kernel = "rectangular")
   fit <- fitted(optdigits_kknn_valid_q5)
-  prob_valid <- predict(optdigits_kknn_valid_q5, valid, type = 'prob')
+  prob_valid <- optdigits_kknn_valid_q5$prob
 
   H[i] <- 0
   for (j in 1:dim(valid)[1]) {
