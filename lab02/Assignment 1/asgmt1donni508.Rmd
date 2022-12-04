@@ -57,10 +57,14 @@ theta_hat_cost <- function(X, y, lambda, theta){
 glm_train <- glmnet(data1_train[,2:101], data1_train[,102], family = "gaussian",alpha = 1)
 plot(glm_train, xvar = "lambda")
 ```
+```{r 1.3 plotzoom}
+zglm_train <- glmnet(data1_train[,2:101], data1_train[,102], family = "gaussian",alpha = 1, lambda = seq(exp(-1),1, length.out = 100))
+plot(zglm_train, xvar = "lambda", main = "zoomed plot")
+```
 
-- when $\lambda$ goes greater, the coefficients will all reduce to 0.While most coefficients is or close to 0 all the way. From the plot, we can choose $\lambda$ which $ln(\lambda)$ close to 0.5 if we want to select a model with only three features. And we can see its $\lambda = 0.7406639$
+- when $\lambda$ goes greater, the coefficients will all reduce to 0.While most coefficients is or close to 0 all the way. From the plot, we can choose $\lambda$ which $ln(\lambda)$ close to 0.5 if we want to select a model with only three features. 
 
-```{r}
+```{r 1.3 findlambda, eval=FALSE, include=FALSE}
 for (i in 1:glmdata1$dim[2]) {
   row_coef <- which(glmdata1$beta[,i] != 0)
   if (length(row_coef) >= 3) {
@@ -70,8 +74,39 @@ for (i in 1:glmdata1$dim[2]) {
 glmdata1$lambda[i]
 ```
 
+## Task 4
 
+```{r 1.4}
+glm_train_ridge <- glmnet(data1_train[,2:101], data1_train[,102], family = "gaussian", alpha = 0)
+plot(glm_train_ridge, xvar = "lambda")
+```
 
+- greater lambda value of ridge will also converge all coefficients to 0, but ridge don not tend to filter some coefficients to 0 when lambda value is small, instead it scales them in relatively similar rates.
 
+## Task 5
 
+```{r 1.5}
 
+glm_train_lassoCV <- cv.glmnet(as.matrix(data1_train[,2:101]), as.matrix(data1_train[,102]), family = "gaussian",alpha = 1)
+plot(glm_train_lassoCV)
+
+nlambda.1se <- which(glm_train_lassoCV$glmnet.fit$lambda == glm_train_lassoCV$lambda.1se)
+nlambda.min <- which(glm_train_lassoCV$glmnet.fit$lambda == glm_train_lassoCV$lambda.min)
+glm_train_lassoCV[["glmnet.fit"]][["df"]][c(nlambda.1se, nlambda.min)]
+glm_train_lassoCV$lambda.1se
+glm_train_lassoCV$lambda.min
+```
+
+- the value of lambda we found that gives minimum cvm is 0.06593502, but it is not significantly better than $log(\lambda) = -4$, the MSE doesn't seems have much difference when $log(\lambda) \le -2$. So we choose lambda.1se as optimal $\lambda$ value which maximize the non-zero coefficients number.
+
+```{r 1.5 scatterplot}
+pred_test_1se <- predict(glm_train_lassoCV, newx = as.matrix(data1_test[,2:101]))
+
+ggplot(data = data.frame(pred_test_1se, obs = data1_test[,102]))+
+  geom_point(aes(x = 1:nrow(data1_test), y = lambda.1se, color = "prediction"))+
+  geom_point(aes(x = 1:nrow(data1_test), y = obs, color = "observation"))+
+  labs(x  = "ID of different samples", y = "Fat level")
+
+```
+
+- We can see that the differences between points of observation and prediction value is close. So we consider it a good prediction.
