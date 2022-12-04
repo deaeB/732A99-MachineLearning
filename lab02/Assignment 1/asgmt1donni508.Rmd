@@ -1,0 +1,12 @@
+---
+title: "Lab 03"
+author: "Group A20"
+date: "2022-12-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
