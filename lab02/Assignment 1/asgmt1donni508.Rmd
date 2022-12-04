@@ -9,4 +9,53 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r library, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(glmnet)
+```
+
+```{r 1.1 preparation}
+set.seed(12345)
+data1 <- read.csv("tecator.csv")
+n <- nrow(data1)
+sample50 <- sample(n, round(0.5 * n))
+
+data1_train <- data1[sample50,]
+data1_test <- data1[-sample50,]
+# Divide data 
+```
+## Task 1
+
+```{r 1.1}
+lm_fat <- glm(Fat ~ . -Sample -Protein -Moisture, data = data1_train, family = gaussian())
+
+pred_train <- predict(lm_fat, newdata = data1_train)
+pred_test <- predict(lm_fat, newdata = data1_test)
+
+err_train <- sum((pred_train - data1_train$Fat)^2) / (2*length(pred_train))
+err_test <- sum((pred_test - data1_test$Fat)^2) / (2*length(pred_test))
+
+```
+
+- Overfitted! Works well on train set but can't fit the test set at all. We need a better method to predict Fat.
+
+## Task 2
+
+```{r 1.2}
+theta_hat_cost <- function(X, y, lambda, theta){
+  theta_hat <- sqrt(sum((X %*% theta - y)^2)) / length(theta) + lambda * sum(theta)
+}
+```
+
+- cost function(with squared error loss):$$\hat\theta = \frac1n||y-X\theta||^2_2 + \lambda||\theta||_1$$
+
+
+
+
+
+
+
+
+
 
