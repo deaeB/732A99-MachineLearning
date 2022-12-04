@@ -44,15 +44,21 @@ err_test <- sum((pred_test - data1_test$Fat)^2) / (2*length(pred_test))
 
 ```{r 1.2}
 theta_hat_cost <- function(X, y, lambda, theta){
+  # WITH intercept
   theta_hat <- sqrt(sum((X %*% theta - y)^2)) / length(theta) + lambda * sum(theta)
 }
 ```
 
 - cost function(with squared error loss):$$\hat\theta = \frac1n||y-X\theta||^2_2 + \lambda||\theta||_1$$
 
+## Task 3
 
+```{r 1.3}
+glm_train <- glmnet(data1_train[,2:101], data1_train[,102], family = "gaussian")
+plot(glm_train, xvar = "lambda")
+```
 
-
+- when $\lambda$ goes greater, the coefficients will all reduce to 0.While most coefficients is or close to 0 all the way. From the plot, we can choose $\lambda$ which $ln(\lambda)$ close to 0.5 if we want to select a model with only three features.
 
 
 
