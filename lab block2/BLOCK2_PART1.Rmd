@@ -1,23 +1,108 @@
 ---
-title: "BLOCK2 LAB1"
-author: "Jin Yan; Donwei Ni; Collins"
-date: "2022-12-07"
-output: html_document
+title: "BLOCK2_PART1"
+author: "Jin Yan; Donwei Ni;"
+date: "2022-12-09"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# PART ONE
 
-## QUESTION ONE
-The code is given in the appendix.
+## EMSEMBLE METHOD
 
-Results are given below.
+*TASK ONE*
+
+The relevant code is added in Appendix
+
+mean_mis_rate1
+0.206625
+
+mean_mis_rate10
+0.137777
+
+mean_mis_rate100
+0.112063
+
+var_mis_rate1
+0.003044475
+
+var_mis_rate10
+0.000964694
+
+var_mis_rate100
+0.0008307177
 
 
-```{r}
+
+*TASK TWO*
+
+The relevant code is added in Appendix
+
+mean_mis_rate1
+0.09753
+
+mean_mis_rate10
+0.016116
+
+mean_mis_rate100
+0.006754
+
+var_mis_rate1
+0.01870012
+
+var_mis_rate10
+0.0006982528
+
+var_mis_rate100
+7.64119e-05
+
+*TASK THREE*
+
+The relevant code is added in Appendix
+
+mean_mis_rate1
+0.245286
+
+mean_mis_rate10
+0.120254
+
+mean_mis_rate100
+0.07359
+
+var_mis_rate1
+0.01369812
+
+var_mis_rate10
+0.002829063
+
+var_mis_rate100
+0.001203491
+
+*TASK FOUR*
+**1.What happens with the mean error rate when the number of trees in the random** 
+**forest grows? Why?**
+From the above three situations, we can see that as the number of basic models 
+increase, the mean error decreases. This is mainly because if there are only few
+and limited training data sets used for training, the model obtained just have
+little information about unseen and new data points. However, with more training
+data sets, the parameters learned contain more information of unseen data sets. 
+When it is used to make predictions, the result would be more accurate.
+
+
+
+```{r eval=FALSE}
+set.seed(1234)
+x1<-runif(1000)
+x2<-runif(1000)
+tedata<-cbind(x1,x2)
+y<-as.numeric(x1<x2)
+telabels<-as.factor(y)
+test_data <- as.data.frame(tedata)
+test_data <- dplyr::mutate(test_data,telabels)
 
 
 # QUESTION ONE PART ONE
@@ -33,9 +118,10 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1, nodesize = 25, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
+  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1
+                                         , nodesize = 25, keep.forest = TRUE)
+  pre <- predict(Forest_1,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
   mis_rate1 <- c(mis_rate1,misclassification_rate)
 }
 
@@ -61,10 +147,11 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 10, nodesize = 25, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
-  mis_rate10 <- c(mis_rate1,misclassification_rate)
+  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 
+                                          10, nodesize = 25, keep.forest = TRUE)
+  pre <- predict(Forest_10,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
+  mis_rate10 <- c(mis_rate10,misclassification_rate)
 }
 
 mean_mis_rate10 <- mean(mis_rate10)
@@ -92,10 +179,11 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 100, nodesize = 25, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
-  mis_rate100 <- c(mis_rate1,misclassification_rate)
+  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, 
+                        ntree = 100, nodesize = 25, keep.forest = TRUE)
+  pre <- predict(Forest_100,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
+  mis_rate100 <- c(mis_rate100,misclassification_rate)
 }
 
 mean_mis_rate100 <- mean(mis_rate100)
@@ -104,21 +192,29 @@ var_mis_rate100 <- var(mis_rate100)
 # the mean and variable for misclassification rate when B = 10
 mean_mis_rate100
 var_mis_rate100
-```
+
+
+################################################################################
+################################################################################
+
+set.seed(1234)
+x1<-runif(1000)
+x2<-runif(1000)
+tedata<-cbind(x1,x2)
+y<-as.numeric(x1<0.5)
+telabels<-as.factor(y)
+test_data <- as.data.frame(tedata)
+test_data <- dplyr::mutate(test_data,telabels)
 
 
 
-## QUESTION TWO
-The code is given in the appendix.
-
-Results are given below.
 
 
-```{r}
+
+
 # QUESTION TWO PART ONE
 mis_rate1 <- c()
 for(i in 1:1000){
-
   x1<-runif(100)
   x2<-runif(100)
   trdata<-cbind(x1,x2)
@@ -129,9 +225,10 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1, nodesize = 25, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
+  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1
+                                         , nodesize = 25, keep.forest = TRUE)
+  pre <- predict(Forest_1,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
   mis_rate1 <- c(mis_rate1,misclassification_rate)
 }
 
@@ -157,18 +254,19 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 10, nodesize = 25, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
-  mis_rate10 <- c(mis_rate1,misclassification_rate)
+  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, 
+                                ntree = 10, nodesize = 25, keep.forest = TRUE)
+  pre <- predict(Forest_10,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
+  mis_rate10 <- c(mis_rate10,misclassification_rate)
 }
 
 mean_mis_rate10 <- mean(mis_rate10)
 var_mis_rate10 <- var(mis_rate10)
+
 # the mean and variable for misclassification rate when B = 10
 mean_mis_rate10
 var_mis_rate10
-
 
 
 # QUESTION tWO PART THREE
@@ -185,10 +283,11 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 100, nodesize = 25, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
-  mis_rate100 <- c(mis_rate1,misclassification_rate)
+  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, 
+                              ntree = 100, nodesize = 25, keep.forest = TRUE)
+  pre <- predict(Forest_100,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
+  mis_rate100 <- c(mis_rate100,misclassification_rate)
 }
 
 mean_mis_rate100 <- mean(mis_rate100)
@@ -199,19 +298,23 @@ mean_mis_rate100
 var_mis_rate100
 
 
-```
 
-## QUESTION THREE
-The code is given in the appendix.
+################################################################################
+################################################################################
+################################################################################
 
-Results are given below.
-
-```{r}
+set.seed(1234)
+x1<-runif(1000)
+x2<-runif(1000)
+tedata<-cbind(x1,x2)
+y<-as.numeric(((x1<0.5 & x2<0.5)|(x1>0.5 & x2>0.5)))
+telabels<-as.factor(y)
+test_data <- as.data.frame(tedata)
+test_data <- dplyr::mutate(test_data,telabels)
 
 # QUESTION THREE PART ONE
 mis_rate1 <- c()
 for(i in 1:1000){
-
   x1<-runif(100)
   x2<-runif(100)
   trdata<-cbind(x1,x2)
@@ -222,9 +325,10 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1, nodesize = 12, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
+  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, 
+                                ntree = 1, nodesize = 12, keep.forest = TRUE)
+  pre <- predict(Forest_1,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
   mis_rate1 <- c(mis_rate1,misclassification_rate)
 }
 
@@ -234,7 +338,6 @@ var_mis_rate1 <- var(mis_rate1)
 # the mean and variable for misclassification rate when B = 1
 mean_mis_rate1
 var_mis_rate1
-
 
 
 
@@ -252,17 +355,20 @@ for(i in 1:1000){
 
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 10, nodesize = 12, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
-  mis_rate10 <- c(mis_rate1,misclassification_rate)
+  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, 
+                                ntree = 10, nodesize = 12, keep.forest = TRUE)
+  pre <- predict(Forest_10,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
+  mis_rate10 <- c(mis_rate10,misclassification_rate)
 }
 
 mean_mis_rate10 <- mean(mis_rate10)
 var_mis_rate10 <- var(mis_rate10)
+
 # the mean and variable for misclassification rate when B = 10
 mean_mis_rate10
 var_mis_rate10
+
 
 
 
@@ -278,13 +384,14 @@ for(i in 1:1000){
   trlabels<-as.factor(y)
 
 
-  # QUESTION ONE
+
   train_data <- as.data.frame(trdata)
   train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 100, nodesize = 12, keep.forest = TRUE)
-  pre <- predict(Forest_1,newdata = train_data)
-  misclassification_rate <- mean(pre!=trlabels)
-  mis_rate100 <- c(mis_rate1,misclassification_rate)
+  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, 
+                              ntree = 100, nodesize = 12, keep.forest = TRUE)
+  pre <- predict(Forest_100,newdata = test_data)
+  misclassification_rate <- mean(pre!=telabels)
+  mis_rate100 <- c(mis_rate100,misclassification_rate)
 }
 
 mean_mis_rate100 <- mean(mis_rate100)
@@ -296,6 +403,4 @@ var_mis_rate100
 
 ```
 
-## QUESTION THREE
-1.From the first two calculations, we can see the misclasification rate decreases first and then increases as the number of trees increases.
 
