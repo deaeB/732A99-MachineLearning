@@ -94,6 +94,36 @@ When it is used to make predictions, the result would be more accurate.
 
 
 
+**2.The third dataset represents a slightly more complicated classification**
+**problem than the first one. Still, you should get better performance for it** 
+**when using suffi-cient trees in the random forest. Explain why you get better** 
+**performance**
+
+The smaller nodesize means that the decision tree tree is larger, in other words
+, the average of the predicted values from the decision tree in the random 
+forest has smaller bias compared to the true values, and this will increase the 
+variance of the distribution of the predicted values from the decision tree in 
+the random forest. However, according to the relationship between the predicted
+values of the decision tree and the predicted values of the random forest, the 
+effect of bagging can make the variance of the distribution of the predicted 
+values of the random forest smaller, especially when B increases gradually. This
+is why, for the third data set, when B is 1, the prediction effect is not as 
+good as the first set of predictions. This is because when B is 1 and the 
+decision tree becomes complex, compared to the true value ,the bias of the mean
+of the distribution of the predicted values of the decision tree inside the 
+random forest decreases and the variance increases, but the bagging effect of 
+the random forest does not work well, so the prediction effect of the random 
+forest is not very good. However, we notice that the effect of bagging is also 
+improved when B increases. Accordingly, compared to the true value the bias of 
+the mean value of the entire random forest prediction distribution is reduced. 
+At the same time, the variance also decreases. In other words, the prediction 
+accuracy of the individual random forest has been significantly improved. This 
+also corresponds to the data.
+
+
+
+
+
 ```{r eval=FALSE}
 set.seed(1234)
 x1<-runif(1000)
