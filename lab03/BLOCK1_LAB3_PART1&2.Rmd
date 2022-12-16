@@ -197,7 +197,7 @@ To calculate the result of linear combination, we used the following formula.
 
 ## APPENDIX
 
-**TASK2**
+**TASK1**
 
 ```{r,eval=FALSE}
 
