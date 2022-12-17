@@ -167,11 +167,14 @@ points(Err_valid, col = "red")
 
 ```
 
-- From this plot, we can learn that when K value is close to zero, the misclassification
-errors of training set should not be taken into consideration. e.g., when K == 1, the 1-nearest-neighbour is exactly each point itself, and of course there will be no misclassification errors.  
-For this reason, K = 4 may possibly be the optimal value.
+- The model complexity increases when K increases, because more nearest-points needs to be evaluated when we want a larger K.
 
-- Generally , the misclassification errors rises when K rises, and the errors of train itself is always lower than valid
+- Generally , the misclassification errors rises when K rises, and the errors of train itself is always lower than valid under our dataset, but the difference between two errors gets smaller correspondingly.
+
+- From this plot, we can learn that when K value is close to zero, the misclassification
+errors of training set should not be taken into consideration. e.g., when K = 1, the 1-nearest-neighbour is exactly each point itself, and of course there will be no misclassification errors.  
+For this reason, K = 4 may possibly be the optimal value, as it yields a low validation error rate and is a earlier stop.
+
 
 ```{r test K4}
 optdigits_kknn_test_k4 <- kknn(as.factor(V65)~., train, test, k = 4,
@@ -185,7 +188,7 @@ Err_train[4]
 Err_valid[4]
 ```
 
-- When K = 4, the misclassification error rate of training set is 1.67%, and 3.56% for valid, 2.3% for test
+- When K = 4, the  mean misclassification error rate of training set is 1.67%, and 3.56% for valid, 2.3% for test. It can be considered a proper model for handwritten recognition.
 
 5. Fit K-nearest neighbor classifiers to the training data for different values of K =
 1,2, … , 30, compute the error for the validation data as cross-entropy ( when
@@ -217,5 +220,5 @@ for (i in 1:30) {
 plot(H, xlab = "K", ylab = "Cross-entropy")
 ```
 
-- K == 10 is the optimal value due to the plot.  
+- K == 10 is the optimal value due to the plot. It yields the lowest cross-entropy of all 30 K values.  
 Misclassification error we are calculating consider things purely under a binary context, i.e., the prediction is correct or is not correct. While cross-entropy also take the possibility into consideration. It not only affected by how wrongly you are, but also affected by how wrongly your wrongs are. An almost correct prediction will considered the same as a completely wrong prediction under misclassification error, but cross-entropy can show the differences.

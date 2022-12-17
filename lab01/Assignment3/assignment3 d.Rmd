@@ -46,11 +46,8 @@ ggplot(data = data_PIdiabetes, aes(x = X8, y = X2, colour = X9)) +
 ```
 
 
-- Yes! Motivation: Looking at the plot, one can see that the plasma glucose concentration
-is more higher for the group with Diabetes level 1 compared to those with level 0.
-This is more evident when plasma glucose concentration is 150 or higher.
-At such one can conclude that it will be easy
-to classify Diabetes by a standard logistic regression
+- No! Motivation: Looking at the plot, one can see that the data points are mixed for the group with Diabetes level 1 compared to those with level 0. And the decision boundary does not seems can be linear enough.
+At such one can conclude that it will be hard to classify Diabetes by a standard logistic regression if we want a low error rate
 
 2.Train a logistic regression model with $y$ = Diabetes as target $x_1$ = Plasma glucose
 concentration and $x_2$ = Age as features and make a prediction for all observations
@@ -126,9 +123,7 @@ ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) +
 
 ```
 
-- From the glm model, Both Plasma glucose and Age have a significant influence on Diabetes. From the results of this classification, we can see that our misclassification error is about 26.6%. This is not too bad I think.
-Just as seen with the original plot earlier, the plot with the predicted Diabetes also depits that
-level-1 Diabetes have more plasma glucose compare to level-0 group
+- From the glm model, Both Plasma glucose and Age have a significant influence on Diabetes. From the results of this classification, we can see that our misclassification error is about 26.6%. This is not good enough especially for diabetes classification. We don't want those who have diabetes be wrongly classified as being healthy.
 
 
 3.Use the model estimated in step 2 to a) report the equation of the decision
@@ -249,7 +244,7 @@ data_PIdiabetes_q5$Z1 <- data_PIdiabetes_q5$X2^4
 data_PIdiabetes_q5$Z2 <- data_PIdiabetes_q5$X2^3 * data_PIdiabetes_q5$X8^1
 data_PIdiabetes_q5$Z3 <- data_PIdiabetes_q5$X2^2 * data_PIdiabetes_q5$X8^2
 data_PIdiabetes_q5$Z4 <- data_PIdiabetes_q5$X2^1 * data_PIdiabetes_q5$X8^3
-data_PIdiabetes_q5$Z5 <- data_PIdiabetes_q5$X8^3
+data_PIdiabetes_q5$Z5 <- data_PIdiabetes_q5$X8^4
 
 glm_diabete_q5 <- glm(X9 ~ X2 + X8 + Z1 + Z2 + Z3 + Z4 + Z5, data_PIdiabetes_q5, family = binomial)
 
@@ -270,4 +265,5 @@ ggplot(data = data_PIdiabetes_q5, aes(x = X8, y = X2, colour = X10)) +
 
 ```
 
-- Comment: When we increase the number of inputs and r equals 0.5, the eventual value of misclassification rate is similar to the one in the second question. The boundary line is no longer a straight line but a curve.
+- Comment: When we increase the number of inputs and r equals 0.5, the eventual value of misclassification rate is similar to the one in the second question. The boundary line is no longer a straight line but a curve.  
+Even though this model have the lowest error rate of all models we have, we still don't consider this one as the best model we have. Because the most important thing is that we can accept that healthy be misclassified as with diabetes, but not the other way round. Thus the r = 0.2 model is the most practical one.
