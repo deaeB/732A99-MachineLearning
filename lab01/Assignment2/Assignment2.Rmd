@@ -19,7 +19,7 @@ The code is given in Appendix.
 **Compute a linear regression model from the training data, estimate training and test MSE and comment on which variables contribute significantly to the model.**
 
 Training MSE is 0.87854
-Test MSE is 0.93945
+Test MSE is 0.93544
 
 When we use summary function we can find that some P values of parameters are marked with three stars. That means these parameters contribute most to the result. They are shown in the picture in Appendix.They are respectively Jitter.Abs Shimmer.APQ5 Shimmer.APQ11 NHR HNR DFA PPE
 
@@ -43,9 +43,9 @@ If we want to create "Ridge function", we need to add $\lambda ||\theta||_2^2$ t
 
 |$\lambda$|$Training\_MSE$|$Test\_MSE$|$DF$|
 |:----:|:----:|:----:|:----:|
-|1|0.8786|0.9350|14.86|
-|100|0.8844|0.9323|10.90|
-|1000|0.9211|0.9539|6.42|
+|1|0.8786|0.9349|13.86|
+|100|0.8844|0.9323|9.92|
+|1000|0.9211|0.9539|5.64|
 
 
 By comparison we found that as the value of the $\lambda$ increases, the value of DF decreases. At the same time, in general the predicted results would be less and less accurate. We also noticed that the optimum  $\lambda$ is 100, which means in order to get the relatively less errors, we should not use the extreme values of $\lambda$.
@@ -62,8 +62,8 @@ library(caret)
 ```
 
 
-```{r}
-my_data = read.csv("parkinsons.csv")
+```{r,eval=FALSE}
+my_data = read.csv("C:/Users/yj313/Desktop/732A99-MachineLearning/lab01/Assignment2/parkinsons.csv")
 set.seed(12345)
 n = nrow(my_data)
 id = sample(1:n, floor(n*0.6))
@@ -77,7 +77,7 @@ testS = predict(scaler, test)
 
 
 # train MSE
-trainS_1 = trainS %>% select(motor_UPDRS, 7:22)# what should we do if name of one column contains #
+trainS_1 = trainS %>% select(motor_UPDRS, 7:22)
 ml = lm(motor_UPDRS~.,trainS_1)
 summary(ml)
 Preds = predict(ml)
@@ -95,18 +95,21 @@ MSE_test = mean((testS_1$motor_UPDRS - Preds_2)^2)
 # The third question.
 
 #a
-n <- nrow(trainS)
-trainS_1 <- tibble(trainS_1)
-one <- tibble(one = rep(1,n))
+# n <- nrow(trainS)
+# trainS_1 <- tibble(trainS_1)
+# one <- tibble(one = rep(1,n))
 
-trainS_1_new <- trainS_1%>%
-  select(-motor_UPDRS)%>%
-  mutate(one, .)
+# trainS_1_new <- trainS_1%>%
+#   select(-motor_UPDRS)%>%
+#   mutate(one, .)
+
+trainS_1_new <- trainS_1 %>%
+  select(-motor_UPDRS)
 
 
 likelihood <- function(xita,sigma){
   n <- nrow(trainS)
-  y_hat <- difference <- as.matrix(trainS_1_new) %*% as.matrix(xita)
+  y_hat <- as.matrix(trainS_1_new) %*% as.matrix(xita)
   difference <- trainS_1$motor_UPDRS - y_hat
   square_difference <- difference^2
   sum <- sum(square_difference)
@@ -124,11 +127,11 @@ Ridge <- function(lambda, xita, sigma){
 RidgeOpt <- function(lambda){
 
   to_optimize <- function(x){
-    x1 = x[1:17]
-    x2 = x[18]
+    x1 = x[1:16]
+    x2 = x[17]
     return(Ridge(lambda, x1, x2))
   }
-  optim(rep(1, times = 18), fn = to_optimize, method = "BFGS")
+  optim(rep(1, times = 17), fn = to_optimize, method = "BFGS")
 }
 
 
@@ -136,7 +139,7 @@ RidgeOpt <- function(lambda){
 #d
 DF <- function(lambda){
   X <- as.matrix(trainS_1_new)
-  I <- diag(ncol(trainS_1))
+  I <- diag(ncol(trainS_1_new))
   element_I <- diag(X %*% solve((t(X) %*% X + lambda * I)) %*% t(X))
   df <- sum(element_I)
   return(df)
@@ -149,20 +152,24 @@ df_1000 <- DF(1000)
 
 #when lambda equals 1, theta
 theta_sigma_1 <- RidgeOpt(1)
-theta_1 <- theta_sigma_1$par[1:17]
+theta_1 <- theta_sigma_1$par[1:16]
 
 ##MSE for training data
 y_hat_tr_1 <- as.matrix(trainS_1_new) %*% as.matrix(theta_1)
 MSE_train_1 <-mean((y_hat_tr_1 - trainS_1$motor_UPDRS)^2)
 
 ##MSE for test data
-n_2 <- nrow(testS)
-testS_1 <- tibble(testS_1)
-one_2 <- tibble(one = rep(1,n_2))
+# n_2 <- nrow(testS)
+# testS_1 <- tibble(testS_1)
+# one_2 <- tibble(one = rep(1,n_2))
+
+# testS_1_new <- testS_1%>%
+#   select(-motor_UPDRS)%>%
+#   mutate(one_2, .)
 
 testS_1_new <- testS_1%>%
-  select(-motor_UPDRS)%>%
-  mutate(one_2, .)
+   select(-motor_UPDRS)
+
 
 y_hat_test_1 <- as.matrix(testS_1_new) %*% as.matrix(theta_1)
 MSE_test_1 <- mean((y_hat_test_1 - testS_1$motor_UPDRS)^2)
@@ -173,7 +180,7 @@ MSE_test_1 <- mean((y_hat_test_1 - testS_1$motor_UPDRS)^2)
 
 #when lambda equals 100, theta
 theta_sigma_2 <- RidgeOpt(100)
-theta_2 <- theta_sigma_2$par[1:17]
+theta_2 <- theta_sigma_2$par[1:16]
 
 
 ## MSE for training data
@@ -190,7 +197,7 @@ MSE_test_2 <- mean((y_hat_test_2 - testS_1$motor_UPDRS)^2)
 
 #when lambda equals 1000, theta
 theta_sigma_3 <- RidgeOpt(1000)
-theta_3 <- theta_sigma_3$par[1:17]
+theta_3 <- theta_sigma_3$par[1:16]
 
 ## MSE for training data
 
@@ -200,7 +207,6 @@ MSE_train_3 <-mean((y_hat_tr_3 - trainS_1$motor_UPDRS)^2)
 ## MSE for test data
 y_hat_test_3 <- as.matrix(testS_1_new) %*% as.matrix(theta_3)
 MSE_test_3 <- mean((y_hat_test_3 - testS_1$motor_UPDRS)^2)
-
 ```
 
 
