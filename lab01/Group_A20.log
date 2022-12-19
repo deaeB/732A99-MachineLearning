@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.11.9)  19 DEC 2022 16:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.11.9)  19 DEC 2022 16:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -640,52 +640,52 @@ line 424.
 File: Group_A20_files/figure-latex/1.5-1.pdf Graphic file (type pdf)
 <use Group_A20_files/figure-latex/1.5-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/1.5-1.pdf  used on input 
-line 540.
+line 541.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [7 <./Group_A20_files/figure-latex/1.5-1.pdf>]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 593.
+(Font)              <10> on input line 594.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 593.
+(Font)              <7> on input line 594.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 593.
+(Font)              <5> on input line 594.
 
-Underfull \hbox (badness 10000) in paragraph at lines 641--643
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 643--646
+Underfull \hbox (badness 10000) in paragraph at lines 642--644
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 646--648
+Underfull \hbox (badness 10000) in paragraph at lines 644--647
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 648--650
+Underfull \hbox (badness 10000) in paragraph at lines 647--649
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 650--652
+Underfull \hbox (badness 10000) in paragraph at lines 649--651
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 651--653
 
  []
 
 [8]
-Underfull \hbox (badness 10000) in paragraph at lines 652--654
+Underfull \hbox (badness 10000) in paragraph at lines 653--655
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 654--656
+Underfull \hbox (badness 10000) in paragraph at lines 655--657
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 656--658
+Underfull \hbox (badness 10000) in paragraph at lines 657--659
 
  []
 
@@ -693,7 +693,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 656--658
 File: Group_A20_files/figure-latex/3.1-1.pdf Graphic file (type pdf)
 <use Group_A20_files/figure-latex/3.1-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/3.1-1.pdf  used on input 
-line 679.
+line 680.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [9 <./Group_A20_files/figure-latex/3.1-1.pdf>] [10]
 <Group_A20_files/figure-latex/3.2 misclassification plot-1.pdf, id=151, 469.755
@@ -702,99 +702,99 @@ File: Group_A20_files/figure-latex/3.2 misclassification plot-1.pdf Graphic fil
 e (type pdf)
 <use Group_A20_files/figure-latex/3.2 misclassification plot-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/3.2 misclassification plo
-t-1.pdf  used on input line 789.
+t-1.pdf  used on input line 790.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [11 <./Group_A20_files/figure-latex/3.2 misclassification plot-1.pdf>]
 <Group_A20_files/figure-latex/3.3-1.pdf, id=161, 469.755pt x 325.215pt>
 File: Group_A20_files/figure-latex/3.3-1.pdf Graphic file (type pdf)
 <use Group_A20_files/figure-latex/3.3-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/3.3-1.pdf  used on input 
-line 833.
+line 834.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [12 <./Group_A20_files/figure-latex/3.3-1.pdf>]
 <Group_A20_files/figure-latex/3.4 r0.2-1.pdf, id=171, 469.755pt x 325.215pt>
 File: Group_A20_files/figure-latex/3.4 r0.2-1.pdf Graphic file (type pdf)
 <use Group_A20_files/figure-latex/3.4 r0.2-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/3.4 r0.2-1.pdf  used on i
-nput line 894.
+nput line 895.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [13 <./Group_A20_files/figure-latex/3.4 r0.2-1.pdf>]
 <Group_A20_files/figure-latex/3.4 r0.8-1.pdf, id=182, 469.755pt x 325.215pt>
 File: Group_A20_files/figure-latex/3.4 r0.8-1.pdf Graphic file (type pdf)
 <use Group_A20_files/figure-latex/3.4 r0.8-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/3.4 r0.8-1.pdf  used on i
-nput line 943.
+nput line 944.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 
-LaTeX Warning: Command \textellipsis invalid in math mode on input line 977.
+LaTeX Warning: Command \textellipsis invalid in math mode on input line 978.
 
 [14 <./Group_A20_files/figure-latex/3.4 r0.8-1.pdf>]
 <Group_A20_files/figure-latex/3.5-1.pdf, id=192, 469.755pt x 325.215pt>
 File: Group_A20_files/figure-latex/3.5-1.pdf Graphic file (type pdf)
 <use Group_A20_files/figure-latex/3.5-1.pdf>
 Package pdftex.def Info: Group_A20_files/figure-latex/3.5-1.pdf  used on input 
-line 1038.
+line 1039.
 (pdftex.def)             Requested size: 469.75386pt x 325.2142pt.
 [15] [16 <./Group_A20_files/figure-latex/3.5-1.pdf>]
-Underfull \vbox (badness 10000) detected at line 1171
+Underfull \vbox (badness 10000) detected at line 1172
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1171
+Underfull \vbox (badness 10000) detected at line 1172
  []
 
 [17]
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 1266.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 1267.
 
 
 
-Underfull \vbox (badness 10000) detected at line 1320
+Underfull \vbox (badness 10000) detected at line 1321
  []
 
 
-Overfull \vbox (1.90346pt too high) detected at line 1320
+Overfull \vbox (1.90346pt too high) detected at line 1321
  []
 
 [18]
-Underfull \vbox (badness 10000) detected at line 1320
+Underfull \vbox (badness 10000) detected at line 1321
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1320
+Underfull \vbox (badness 10000) detected at line 1321
  []
 
 [19]
-Underfull \vbox (badness 10000) detected at line 1320
+Underfull \vbox (badness 10000) detected at line 1321
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1320
+Underfull \vbox (badness 10000) detected at line 1321
  []
 
 [20]
-Underfull \vbox (badness 10000) detected at line 1465
+Underfull \vbox (badness 10000) detected at line 1466
  []
 
 
-Overfull \vbox (1.35123pt too high) detected at line 1465
+Overfull \vbox (1.35123pt too high) detected at line 1466
  []
 
 [21]
-Underfull \vbox (badness 10000) detected at line 1465
+Underfull \vbox (badness 10000) detected at line 1466
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1465
+Underfull \vbox (badness 10000) detected at line 1466
  []
 
 [22]
-Underfull \vbox (badness 10000) detected at line 1465
+Underfull \vbox (badness 10000) detected at line 1466
  []
 
 
-Underfull \vbox (badness 10000) detected at line 1465
+Underfull \vbox (badness 10000) detected at line 1466
  []
 
 [23] [24] (Group_A20.aux) ) 
@@ -823,7 +823,7 @@ e1/public/lm/lmsy10.pfb><D:/Program/LaTeX/MiKTeX/fonts/type1/public/lm/lmsy7.pf
 b><D:/Program/LaTeX/MiKTeX/fonts/type1/public/lm/lmtk10.pfb><D:/Program/LaTeX/M
 iKTeX/fonts/type1/public/lm/lmtko10.pfb><D:/Program/LaTeX/MiKTeX/fonts/type1/pu
 blic/lm/lmtt10.pfb><D:/Program/LaTeX/MiKTeX/fonts/type1/public/lm/lmtti10.pfb>
-Output written on Group_A20.pdf (24 pages, 689326 bytes).
+Output written on Group_A20.pdf (24 pages, 689349 bytes).
 PDF statistics:
  371 PDF objects out of 1000 (max. 8388607)
  59 named destinations out of 1000 (max. 500000)

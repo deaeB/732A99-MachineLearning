@@ -175,7 +175,7 @@ points(Err_valid, col = "red")
 
 - From this plot, we can learn that when K value is close to zero, the misclassification
 errors of training set should not be taken into consideration. e.g., when K = 1, the 1-nearest-neighbour is exactly each point itself, and of course there will be no misclassification errors.  
-For this reason, K = 4 may possibly be the optimal value, as it yields a low validation error rate and is a earlier stop.
+For this reason, K = 4 may possibly be the optimal value, as it yields the same lowest validation error rate as K =7 but K = 4 is a earlier stop.
 
 
 ```{r test K4}
