@@ -86,11 +86,9 @@ var_mis_rate100
 **1.What happens with the mean error rate when the number of trees in the random** 
 **forest grows? Why?**
 From the above three situations, we can see that as the number of basic models 
-increase, the mean error decreases. This is mainly because if there are only few
-and limited training data sets used for training, the model obtained just have
-little information about unseen and new data points. However, with more training
-data sets, the parameters learned contain more information of unseen data sets. 
-When it is used to make predictions, the result would be more accurate.
+increase, the mean error decreases. This is because when B(the number of of 
+basic models) increases, the variance decreases according to the formula (7.2b)
+in MLFC.
 
 
 
