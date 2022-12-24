@@ -1,0 +1,943 @@
+---
+title: "Lab01 "
+author: "Group A20"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Statement Of Contribution:**
+  
+Assignment 1: NI Dongwei  
+Assignment 2: YAN Jin  
+Assignment 3: Collins Klinsmann Osondu, YAN Jin, NI Dongwei  
+
+```{r lib, include=FALSE}
+library(kknn)
+library(caret)
+library(shipunov)
+library(tidyverse)
+library(ggplot2)
+```
+
+# PART I
+
+## Assignment 1. Handwritten digit recognition with Knearest neighbors.
+
+1. Import the data into R and divide it into training, validation and test sets(50%/25%/25%) by using the partitioning principle specified in the lecture slides.
+
+
+```{r 1.1 partition, echo=TRUE}
+optdigits <- read.csv("optdigits.csv", header = FALSE)
+
+set.seed(24601)
+
+n <- nrow(optdigits)
+
+r_train <- sample(1:n, floor(n*0.5))
+train <-  optdigits[r_train, ]
+
+r_nont <- setdiff(1:n, r_train)
+r_valid <- sample(r_nont, floor(n*0.25))
+valid <- optdigits[r_valid, ]
+ 
+test <- optdigits[setdiff(r_nont, r_valid), ]
+```
+
+```{r 1.1 showdim}
+dim(train)
+dim(valid)
+dim(test)
+```
+
+2.Use training data to fit 30-nearest neighbor classifier with function kknn() and
+kernel=”rectangular” from package kknn and estimate  
+
+• Confusion matrices for the training and test data (use table())  
+
+• Misclassification errors for the training and test data  
+
+Comment on the quality of predictions for different digits and on the overall prediction quality.
+
+- train:
+
+```{r 1.2 train}
+optdigits_kknn_train_k30 <- kknn(as.factor(V65)~., train, train, k=30,
+                                 kernel="rectangular")
+fit <- fitted(optdigits_kknn_train_k30)
+Misclass( fit, train$V65)
+```
+
+- test:
+
+```{r 1.2 test}
+optdigits_kknn_test_k30 <- kknn(as.factor(V65)~., train, test, k=30,
+                                kernel="rectangular")
+fit <- fitted(optdigits_kknn_test_k30)
+Misclass( fit, test$V65)
+```
+
+- for 0, 2, 6, 7 : best quality, at most 2.2% misclassification error for both train and test
+- for 4, 9 : worst quality, at least 8.5% misclassification error for both train and test
+
+- overall prediction quality: 4.8% mean misclassification error for train and 4.5% for test. Acceptable error rate(as a lab assignment) and differences.
+
+
+3. Find any 2 cases of digit “8” in the training data which were easiest to classify
+and 3 cases that were hardest to classify (i.e. having highest and lowest
+probabilities of the correct class). Reshape features for each of these cases as
+matrix 8x8 and visualize the corresponding digits (by using e.g. heatmap()
+function with parameters Colv=NA and Rowv=NA) and comment on whether
+these cases seem to be hard or easy to recognize visually.
+
+```{r 1.3 find 8s}
+originID <- which( train$V65 == 8)
+# original id in train set
+
+prob_train_k30 <- cbind(ID = originID,
+                        optdigits_kknn_train_k30$prob[originID,]
+                        ) %>% 
+  as.data.frame() %>% 
+  arrange(`8`)
+#sort out the probabilities of observation 8 and arrange increasingly
+
+
+head(prob_train_k30, 3L)
+# hardest 427, 1480, 1033
+
+tail(prob_train_k30, 2L)
+# easiest 1867, 1895
+
+
+```
+
+```{r 1.3 plot 8s, out.width = "50%", out.height = "50%"}
+easy <- c(1867, 1895)
+hard <- c(427, 1480, 1033)
+
+for (i in c(easy, hard)) {
+  if (any(i == easy) ) {
+    title <- paste("Easy: No.", i)
+  }else {
+    title <- paste("Hard: No.", i)
+  }
+  
+  heatmap(
+    matrix(as.numeric(train[i,-65]), nrow = 8, ncol = 8, byrow = TRUE),
+    Colv = NA, Rowv = NA, main = title
+    )
+}
+```
+
+- visually the heatmap gives human the same difficulty to recognize as to our model , its clear and easy to recognize for human for those easiest-to-classify figures and similarly it's hard for human to recognize for the hardest ones.
+
+4. Fit a K-nearest neighbor classifiers to the training data for different values of K =
+1,2, … , 30 and plot the dependence of the training and validation misclassification
+errors on the value of K (in the same plot). How does the model complexity
+change when K increases and how does it affect the training and validation errors? Report the optimal K according to this plot. Finally, estimate the test error
+for the model having the optimal K, compare it with the training and validation
+errors and make necessary conclusions about the model quality.
+
+```{r 1.4}
+Err_train <- vector()
+Err_valid <- vector()
+
+for (i in 1:30) {
+  optdig_kknn_train_1loop30 <- kknn(as.factor(V65)~., train, train, k = i ,
+                                    kernel = "rectangular")
+  fit <- fitted(optdig_kknn_train_1loop30)
+  cfsMtx <- table(fit, train$V65)
+  Err_train[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
+  
+  
+  optdig_kknn_valid_1loop30 <- kknn(as.factor(V65)~., train, valid, k = i ,
+                                    kernel = "rectangular")
+  fit <- fitted(optdig_kknn_valid_1loop30)
+  cfsMtx <- table(fit, valid$V65)
+  Err_valid[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
+}
+
+
+
+plot(Err_train, main = "train: black   valid: red", ylim = c(0, 0.06),
+     ylab = "errors(%)", xlab = "K")
+points(Err_valid, col = "red")
+
+```
+
+- The model complexity increases when K increases, because more nearest-points needs to be evaluated when we want a larger K.
+
+- Generally , the misclassification errors rises when K rises, and the errors of train itself is always lower than valid under our dataset, but the difference between two errors gets smaller correspondingly.
+
+- From this plot, we can learn that when K value is close to zero, the misclassification
+errors of training set should not be taken into consideration. e.g., when K = 1, the 1-nearest-neighbour is exactly each point itself, and of course there will be no misclassification errors.  
+For this reason, K = 4 may possibly be the optimal value, as it yields the same lowest validation error rate as K =7 but K = 4 is a earlier stop.
+
+
+```{r test K4}
+optdigits_kknn_test_k4 <- kknn(as.factor(V65)~., train, test, k = 4,
+                               kernel="rectangular")
+fit <- fitted(optdigits_kknn_test_k4)
+Misclass( fit, test$V65)
+```
+
+```{r error rate}
+Err_train[4]
+Err_valid[4]
+```
+
+- When K = 4, the  mean misclassification error rate of training set is 1.67%, and 3.56% for valid, 2.3% for test. It can be considered a proper model for handwritten recognition.
+
+5. Fit K-nearest neighbor classifiers to the training data for different values of K =
+1,2, … , 30, compute the error for the validation data as cross-entropy ( when
+computing log of probabilities add a small constant within log, e.g. 1e-15, to
+avoid numerical problems) and plot the dependence of the validation error on the
+value of K. What is the optimal K value here? Assuming that response has
+multinomial distribution, why might the cross-entropy be a more suitable choice
+of the error function than the misclassification error for this problem?
+
+
+```{r 1.5}
+H <- 0
+
+for (i in 1:30) {
+  optdigits_kknn_valid_q5 <- kknn(as.factor(V65)~., train,valid, k = i ,
+                                  kernel = "rectangular")
+  fit <- fitted(optdigits_kknn_valid_q5)
+  prob_valid <- optdigits_kknn_valid_q5$prob
+
+  H[i] <- 0
+  for (j in 1:dim(valid)[1]) {
+    g <- prob_valid[j, 1 + valid[j, 65]]
+    names(g) <- NULL
+
+    H[i] <- H[i] + (-log(g + exp(-15)))
+  }
+}
+
+plot(H, xlab = "K", ylab = "Cross-entropy")
+```
+
+- K == 10 is the optimal value due to the plot. It yields the lowest cross-entropy of all 30 K values.  
+Misclassification error we are calculating consider things purely under a binary context, i.e., the prediction is correct or is not correct. While cross-entropy also take the possibility into consideration. It not only affected by how wrongly you are, but also affected by how wrongly your wrongs are. An almost correct prediction will considered the same as a completely wrong prediction under misclassification error, but cross-entropy can show the differences.
+
+# PART II
+
+## Question 1
+**Divide it into training and test data (60/40) and scale it appropriately. In the coming steps, assume that motor_UPDRS is normally distributed and is a function of the voice characteristics, and since the data are scaled, no intercept is needed in the modelling.**
+
+The code is given in Appendix.
+
+## Question 2
+**Compute a linear regression model from the training data, estimate training and test MSE and comment on which variables contribute significantly to the model.**
+
+Training MSE is 0.87854
+Test MSE is 0.93544
+
+When we use summary function we can find that some P values of parameters are marked with three stars. That means these parameters contribute most to the result. They are shown in the picture in Appendix.They are respectively Jitter.Abs Shimmer.APQ5 Shimmer.APQ11 NHR HNR DFA PPE
+
+
+## Question 3
+**Implementing 4 functions, which are "Loglikelihood function", " Ridge function", "RidgeOpt function", "DF function".**
+
+Four functions are given in Appendix.
+
+We create the "Loglikelihood function" based on the following formula:
+$\ln p(\mathbf y|\mathbf X;\mathbf \theta) = -\frac{n}{2} \ln(2\pi\sigma^2_\epsilon) - \frac{1}{2\sigma^2_\epsilon}\sum_{i =1}^n(\theta^\mathrm T \mathbf x_i -y_i)^2$
+
+
+If we want to create "Ridge function", we need to add $\lambda ||\theta||_2^2$ to the last formula.
+
+
+
+## Question 4
+
+**By using function RidgeOpt, compute optimal** $\theta$ **parameters for** $\lambda$**= 1,** $\lambda$ **= 100 and** $\lambda$ **= 1000. Use the estimated parameters to predict the motor_UPDRS values for training and test data and report the training and test MSE values. Which penalty parameter is most appropriate among the selected ones? Compute and compare the degrees of freedom of these models and make appropriate conclusions.**
+
+|$\lambda$|$Training\_MSE$|$Test\_MSE$|$DF$|
+|:----:|:----:|:----:|:----:|
+|1|0.8786|0.9349|13.86|
+|100|0.8844|0.9323|9.92|
+|1000|0.9211|0.9539|5.64|
+
+
+By comparison we found that as the value of the $\lambda$ increases, the value of DF decreases. At the same time, in general the predicted results would be less and less accurate. We also noticed that the optimum  $\lambda$ is 100, which means in order to get the relatively less errors, we should not use the extreme values of $\lambda$.
+
+# PART III
+
+
+## Assignment 3. Logistic regression and basis function expansion
+The data file **pima-indians-diabetes.csv** contains information about the onset of
+diabetes within 5 years in Pima Indians given medical details. The variables are (in
+the same order as in the dataset):
+
+1. Number of times pregnant.  
+2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.  
+3. Diastolic blood pressure (mm Hg).  
+4. Triceps skinfold thickness (mm).  
+5. 2-Hour serum insulin (mu U/ml).  
+6. Body mass index (weight in kg/(height in m)^2).  
+7. Diabetes pedigree function.  
+8. Age (years).  
+9. Diabetes (0=no or 1=yes)  
+
+1.Make a scatterplot showing a Plasma glucose concentration on Age where observations are colored by Diabetes levels. Do you think that Diabetes is easy to classify by a standard logistic regression model that uses these two variables as features? Motivate your answer.
+
+
+```{r library, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(shipunov)
+```
+```{r 3.1, echo=TRUE}
+
+data_PIdiabetes <- read.csv("pima-indians-diabetes.csv", col.names = c(1:9))
+
+data_PIdiabetes$X9 <- factor(data_PIdiabetes$X9)
+
+ggplot(data = data_PIdiabetes, aes(x = X8, y = X2, colour = X9)) + 
+  geom_point() + 
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Diabetes (0=no or 1=yes)" )
+
+```
+
+
+- No! Motivation: Looking at the plot, one can see that the data points are mixed for the group with Diabetes level 1 compared to those with level 0. And the decision boundary does not seems can be linear enough.
+At such one can conclude that it will be hard to classify Diabetes by a standard logistic regression if we want a low error rate
+
+2.Train a logistic regression model with $y$ = Diabetes as target $x_1$ = Plasma glucose
+concentration and $x_2$ = Age as features and make a prediction for all observations
+by using $r$ = 0.5 as the classification threshold. Report the probabilistic equation
+of the estimated model (i.e., how the target depends on the features and the
+estimated model parameters probabilistically). Compute also the training
+misclassification error and make a scatter plot of the same kind as in step 1 but
+showing the predicted values of Diabetes as a color instead. Comment on the
+quality of the classification by using these results
+
+```{r 3.2 split, eval=FALSE, include=FALSE}
+set.seed(24601)
+
+n <- nrow(data_PIdiabetes)
+
+r_train <- sample(1:n, floor(n*0.5))
+train <-  data_PIdiabetes[r_train, ]
+
+r_nont <- setdiff(1:n, r_train)
+r_valid <- sample(r_nont, floor(n*0.25))
+valid <- data_PIdiabetes[r_valid, ]
+ 
+test <- data_PIdiabetes[setdiff(r_nont, r_valid), ]
+
+```
+
+- Logistic regression analysis belongs to the class of generalized linear models.
+In R generalized linear models are handled by the glm() function. The function is
+written as glm(response ~ predictor, family = binomial(link = "logit"), data).
+Please note that logit is the default for binomial; thus, we do not have to type it explicitly.
+The glm() function returns a model object, therefore we may apply extractor functions, such as summary(),
+fitted() or predict, among others, on it. However, please note that the output numbers are on the logit scale.
+To actually predict probabilities we need to provide the predict() function an
+additional argument type = "response"
+
+```{r 3.2 glm}
+# X2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.
+# X8. Age (years).
+# X9. Diabetes (0=no or 1=yes).
+
+glm_diabete <- glm(X9 ~ X2 + X8, data_PIdiabetes, family = binomial)
+
+fit <- ifelse(fitted(glm_diabete) >= 0.5, 1, 0)
+
+```
+
+```{r 3.2 probabilistic equation}
+glm_diabete$coefficients
+```
+- we have
+$$g(x) = \cfrac{1}{1 + e^{-\theta^T x}} $$
+and use coefficients we got:
+$$g(x) = \cfrac{1}{1 + e^{-(-5.89785793 + 0.03558250x_1 + 0.02450157x_2)}} $$
+while $x_1$ = Plasma glucose concentration and $x_2$ = age.
+
+```{r 3.2 misclassification plot}
+
+tq1 <- table(fit, data_PIdiabetes$X9)
+tq1
+# confusion matrix
+1 - (sum(diag(tq1)) / sum(tq1))
+# misclassification error
+
+
+data_PIdiabetes_q1 <- data_PIdiabetes
+data_PIdiabetes_q1$X10 <- factor(fit)
+
+ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour = "Predicted Diabetes (0=no or 1=yes)" )
+
+
+```
+
+- From the glm model, Both Plasma glucose and Age have a significant influence on Diabetes. From the results of this classification, we can see that our misclassification error is about 26.6%. This is not good enough especially for diabetes classification. We don't want those who have diabetes be wrongly classified as being healthy.
+
+
+3.Use the model estimated in step 2 to a) report the equation of the decision
+boundary between the two classes b) add a curve showing this boundary to the
+scatter plot in step 2. Comment whether the decision boundary seems to catch the
+data distribution well.
+
+- when r = 0.5, we have
+$$\cfrac{1}{1 + e^{-\theta^T x}} = 0.5$$
+then we have $\theta^T x = 0$  , i.e. $\theta_0 + \theta_1x_1 + \theta_2x_2 =0$  ($x_1: concentration, x_2: age$)  
+thus $slope = \cfrac{-\theta_2}{\theta_1}$, $intercept = \cfrac{-\theta_0}{\theta_1}$
+
+
+```{r 3.3}
+theta <- coef(glm_diabete)
+
+slope <- (-theta[3]) / theta[2]
+intercept <- (-theta[1] ) / (theta[2]) 
+
+ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  geom_abline(slope = slope, intercept = intercept) +
+  
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)")
+
+
+```
+
+- Comments:I think this decision boundary does well for separating the data belonging two classes, even though not all data are put into the right sides of the boundary line.
+
+
+
+4.Make same kind of plots as in step 2 but use thresholds r = 0.2 and r = 0.8. By
+using these plots, comment on what happens with the prediction when r value
+changes.  
+
+
+```{r 3.4 r0.2}
+fit_r02 <- ifelse(fitted(glm_diabete) >= 0.2, 1, 0)
+
+tr02 <- table(fit_r02, data_PIdiabetes$X9)
+tr02
+#confusion matrix
+1 - (sum(diag(tr02)) / sum(tr02))
+#misclassification error
+
+
+data_PIdiabetes_r02 <- data_PIdiabetes
+data_PIdiabetes_r02$X10 <- factor(fit_r02)
+
+slope <- (-theta[3]) / theta[2]
+intercept <- (-log(4) - theta[1] ) / (theta[2]) 
+
+ggplot(data = data_PIdiabetes_r02, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  geom_abline(slope = slope, intercept = intercept) +
+  
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)", title = "r = 0.2" )
+
+```
+
+```{r 3.4 r0.8}
+
+fit_r08 <- ifelse(fitted(glm_diabete) >= 0.8, 1, 0)
+
+
+tr08 <- table(fit_r08, data_PIdiabetes$X9)
+tr08
+#confusion matrix
+1 - (sum(diag(tr08)) / sum(tr08))
+#misclassification error
+
+data_PIdiabetes_r08 <- data_PIdiabetes
+data_PIdiabetes_r08$X10 <- factor(fit_r08)
+
+slope <- (-theta[3]) / theta[2]
+intercept <- (log(4) - theta[1] ) / (theta[2]) 
+
+ggplot(data = data_PIdiabetes_r08, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  geom_abline(slope = slope, intercept = intercept) +
+  
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)", title = "r = 0.8" )
+
+
+```
+
+- Comment: When r is 0.8, we can find that the method is more likely to regard the patients with diabetes as healthy. The probability is 87%. By contrast, when we use r = 0.2 as the threshold, we can find the patients with more probability, which is 91%.
+
+
+
+```{r}
+242/(242+25)
+231/(231+36)
+
+```
+
+5.Perform a basis function expansion trick by computing new features $z_1 = x_1^4, z_2 = x_1^3x_2^1, z_3 = x_1^2x_2^2, z_4 = x_1^1x_2^3, z_5 = x_2^4$, adding them to the data set and
+then computing a logistic regression model with y as target and
+$x_1, x_2, z_1, …,z_5$ as features. Create a scatterplot of the same kind as in step 2
+for this model and compute the training misclassification rate. What can you
+say about the quality of this model compared to the previous logistic
+regression model? How have the basis expansion trick affected the shape of
+the decision boundary and the prediction accuracy?  
+
+
+```{r 3.5}
+data_PIdiabetes_q5 <-  data_PIdiabetes %>%  select(c(X2,X8,X9))
+# X2,X8,X9
+# 2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.
+# 8. Age (years).
+# 9. Diabetes (0=no or 1=yes).
+
+data_PIdiabetes_q5$Z1 <- data_PIdiabetes_q5$X2^4
+data_PIdiabetes_q5$Z2 <- data_PIdiabetes_q5$X2^3 * data_PIdiabetes_q5$X8^1
+data_PIdiabetes_q5$Z3 <- data_PIdiabetes_q5$X2^2 * data_PIdiabetes_q5$X8^2
+data_PIdiabetes_q5$Z4 <- data_PIdiabetes_q5$X2^1 * data_PIdiabetes_q5$X8^3
+data_PIdiabetes_q5$Z5 <- data_PIdiabetes_q5$X8^4
+
+glm_diabete_q5 <- glm(X9 ~ X2 + X8 + Z1 + Z2 + Z3 + Z4 + Z5, data_PIdiabetes_q5, family = binomial)
+
+fit <- ifelse(fitted(glm_diabete_q5) >= 0.5, 1, 0)
+
+tq5 <- table(fit, data_PIdiabetes_q5$X9)
+tq5
+# confusion matrix
+1 - (sum(diag(tq5)) / sum(tq5))
+# misclassification error
+
+data_PIdiabetes_q5$X10 <- factor(fit)
+
+ggplot(data = data_PIdiabetes_q5, aes(x = X8, y = X2, colour = X10)) +
+  geom_point() +
+  labs(x = "Age", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)")
+
+```
+
+- Comment: When we increase the number of inputs and r equals 0.5, the eventual value of misclassification rate is similar to the one in the second question. The boundary line is no longer a straight line but a curve.  
+Even though this model have the lowest error rate of all models we have, we still don't consider this one as the best model we have. Because the most important thing is that we can accept that healthy be misclassified as with diabetes, but not the other way round. Thus the r = 0.2 model is the most practical one.
+
+
+# Appendix
+
+```{r codeI, eval=FALSE}
+library(kknn)
+library(caret)
+library(shipunov)
+library(tidyverse)
+library(ggplot2)
+optdigits <- read.csv("optdigits.csv", header = FALSE)
+
+set.seed(24601)
+
+n <- nrow(optdigits)
+
+r_train <- sample(1:n, floor(n*0.5))
+train <-  optdigits[r_train, ]
+
+r_nont <- setdiff(1:n, r_train)
+r_valid <- sample(r_nont, floor(n*0.25))
+valid <- optdigits[r_valid, ]
+ 
+test <- optdigits[setdiff(r_nont, r_valid), ]
+dim(train)
+dim(valid)
+dim(test)
+optdigits_kknn_train_k30 <- kknn(as.factor(V65)~., train, train, k=30,
+                                 kernel="rectangular")
+fit <- fitted(optdigits_kknn_train_k30)
+Misclass( fit, train$V65)
+optdigits_kknn_test_k30 <- kknn(as.factor(V65)~., train, test, k=30,
+                                kernel="rectangular")
+fit <- fitted(optdigits_kknn_test_k30)
+Misclass( fit, test$V65)
+originID <- which( train$V65 == 8)
+# original id in train set
+
+prob_train_k30 <- cbind(ID = originID,
+                        optdigits_kknn_train_k30$prob[originID,]
+                        ) %>% 
+  as.data.frame() %>% 
+  arrange(`8`)
+#sort out the probabilities of observation 8 and arrange increasingly
+
+
+head(prob_train_k30, 3L)
+# hardest 427, 1480, 1033
+
+tail(prob_train_k30, 2L)
+# easiest 1867, 1895
+
+easy <- c(1867, 1895)
+hard <- c(427, 1480, 1033)
+
+for (i in c(easy, hard)) {
+  if (any(i == easy) ) {
+    title <- paste("Easy: No.", i)
+  }else {
+    title <- paste("Hard: No.", i)
+  }
+  
+  heatmap(
+    matrix(as.numeric(train[i,-65]), nrow = 8, ncol = 8, byrow = TRUE),
+    Colv = NA, Rowv = NA, main = title
+    )
+}
+Err_train <- vector()
+Err_valid <- vector()
+
+for (i in 1:30) {
+  optdig_kknn_train_1loop30 <- kknn(as.factor(V65)~., train, train, k = i ,
+                                    kernel = "rectangular")
+  fit <- fitted(optdig_kknn_train_1loop30)
+  cfsMtx <- table(fit, train$V65)
+  Err_train[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
+  
+  
+  optdig_kknn_valid_1loop30 <- kknn(as.factor(V65)~., train, valid, k = i ,
+                                    kernel = "rectangular")
+  fit <- fitted(optdig_kknn_valid_1loop30)
+  cfsMtx <- table(fit, valid$V65)
+  Err_valid[i] <-( sum(cfsMtx)- sum(diag(cfsMtx))) / sum(cfsMtx)
+}
+
+
+
+plot(Err_train, main = "train: black   valid: red", ylim = c(0, 0.06),
+     ylab = "errors(%)", xlab = "K")
+points(Err_valid, col = "red")
+
+optdigits_kknn_test_k4 <- kknn(as.factor(V65)~., train, test, k = 4,
+                               kernel="rectangular")
+fit <- fitted(optdigits_kknn_test_k4)
+Misclass( fit, test$V65)
+Err_train[4]
+Err_valid[4]
+
+H <- 0
+
+for (i in 1:30) {
+  optdigits_kknn_valid_q5 <- kknn(as.factor(V65)~., train,valid, k = i ,
+                                  kernel = "rectangular")
+  fit <- fitted(optdigits_kknn_valid_q5)
+  prob_valid <- optdigits_kknn_valid_q5$prob
+
+  H[i] <- 0
+  for (j in 1:dim(valid)[1]) {
+    g <- prob_valid[j, 1 + valid[j, 65]]
+    names(g) <- NULL
+
+    H[i] <- H[i] + (-log(g + exp(-15)))
+  }
+}
+
+plot(H, xlab = "K", ylab = "Cross-entropy")
+
+```
+
+```{r codeII, eval=FALSE}
+my_data = read.csv("C:/Users/yj313/Desktop/732A99-MachineLearning/lab01/Assignment2/parkinsons.csv")
+set.seed(12345)
+n = nrow(my_data)
+id = sample(1:n, floor(n*0.6))
+train = my_data[id,]
+test = my_data[-id,]
+
+
+scaler = preProcess(train)
+trainS = predict(scaler, train)
+testS = predict(scaler, test)
+
+
+# train MSE
+trainS_1 = trainS %>% select(motor_UPDRS, 7:22)
+ml = lm(motor_UPDRS~.,trainS_1)
+summary(ml)
+Preds = predict(ml)
+MSE_training = mean((trainS_1$motor_UPDRS - Preds)^2)
+
+# test MSE
+testS_1 = testS %>% select(motor_UPDRS, 7:22)
+Preds_2 = predict(ml,testS_1)
+
+
+MSE_test = mean((testS_1$motor_UPDRS - Preds_2)^2)
+
+
+
+# The third question.
+
+#a
+# n <- nrow(trainS)
+# trainS_1 <- tibble(trainS_1)
+# one <- tibble(one = rep(1,n))
+
+# trainS_1_new <- trainS_1%>%
+#   select(-motor_UPDRS)%>%
+#   mutate(one, .)
+
+trainS_1_new <- trainS_1 %>%
+  select(-motor_UPDRS)
+
+
+likelihood <- function(xita,sigma){
+  n <- nrow(trainS)
+  y_hat <- as.matrix(trainS_1_new) %*% as.matrix(xita)
+  difference <- trainS_1$motor_UPDRS - y_hat
+  square_difference <- difference^2
+  sum <- sum(square_difference)
+  return((-n/2) * log(2 * pi * sigma^2 ) - (1 / (2 * sigma^2)) * sum)
+
+}
+
+#b
+Ridge <- function(lambda, xita, sigma){
+  -likelihood(xita,sigma) + lambda * sum(xita^2)
+}
+
+
+#c
+RidgeOpt <- function(lambda){
+
+  to_optimize <- function(x){
+    x1 = x[1:16]
+    x2 = x[17]
+    return(Ridge(lambda, x1, x2))
+  }
+  optim(rep(1, times = 17), fn = to_optimize, method = "BFGS")
+}
+
+
+
+#d
+DF <- function(lambda){
+  X <- as.matrix(trainS_1_new)
+  I <- diag(ncol(trainS_1_new))
+  element_I <- diag(X %*% solve((t(X) %*% X + lambda * I)) %*% t(X))
+  df <- sum(element_I)
+  return(df)
+}
+df_1 <- DF(1)
+df_100 <- DF(100)
+df_1000 <- DF(1000)
+
+#e
+
+#when lambda equals 1, theta
+theta_sigma_1 <- RidgeOpt(1)
+theta_1 <- theta_sigma_1$par[1:16]
+
+##MSE for training data
+y_hat_tr_1 <- as.matrix(trainS_1_new) %*% as.matrix(theta_1)
+MSE_train_1 <-mean((y_hat_tr_1 - trainS_1$motor_UPDRS)^2)
+
+##MSE for test data
+# n_2 <- nrow(testS)
+# testS_1 <- tibble(testS_1)
+# one_2 <- tibble(one = rep(1,n_2))
+
+# testS_1_new <- testS_1%>%
+#   select(-motor_UPDRS)%>%
+#   mutate(one_2, .)
+
+testS_1_new <- testS_1%>%
+   select(-motor_UPDRS)
+
+
+y_hat_test_1 <- as.matrix(testS_1_new) %*% as.matrix(theta_1)
+MSE_test_1 <- mean((y_hat_test_1 - testS_1$motor_UPDRS)^2)
+
+
+
+
+
+#when lambda equals 100, theta
+theta_sigma_2 <- RidgeOpt(100)
+theta_2 <- theta_sigma_2$par[1:16]
+
+
+## MSE for training data
+
+y_hat_tr_2 <- as.matrix(trainS_1_new) %*% as.matrix(theta_2)
+MSE_train_2 <-mean((y_hat_tr_2 - trainS_1$motor_UPDRS)^2)
+
+## MSE for test data
+y_hat_test_2 <- as.matrix(testS_1_new) %*% as.matrix(theta_2)
+MSE_test_2 <- mean((y_hat_test_2 - testS_1$motor_UPDRS)^2)
+
+
+
+
+#when lambda equals 1000, theta
+theta_sigma_3 <- RidgeOpt(1000)
+theta_3 <- theta_sigma_3$par[1:16]
+
+## MSE for training data
+
+y_hat_tr_3 <- as.matrix(trainS_1_new) %*% as.matrix(theta_3)
+MSE_train_3 <-mean((y_hat_tr_3 - trainS_1$motor_UPDRS)^2)
+
+## MSE for test data
+y_hat_test_3 <- as.matrix(testS_1_new) %*% as.matrix(theta_3)
+MSE_test_3 <- mean((y_hat_test_3 - testS_1$motor_UPDRS)^2)
+
+```
+
+```{r codeIII, eval=FALSE}
+
+library(tidyverse)
+library(ggplot2)
+library(shipunov)
+
+data_PIdiabetes <- read.csv("pima-indians-diabetes.csv", col.names = c(1:9))
+
+data_PIdiabetes$X9 <- factor(data_PIdiabetes$X9)
+
+ggplot(data = data_PIdiabetes, aes(x = X8, y = X2, colour = X9)) + 
+  geom_point() + 
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Diabetes (0=no or 1=yes)" )
+
+set.seed(24601)
+
+n <- nrow(data_PIdiabetes)
+
+r_train <- sample(1:n, floor(n*0.5))
+train <-  data_PIdiabetes[r_train, ]
+
+r_nont <- setdiff(1:n, r_train)
+r_valid <- sample(r_nont, floor(n*0.25))
+valid <- data_PIdiabetes[r_valid, ]
+ 
+test <- data_PIdiabetes[setdiff(r_nont, r_valid), ]
+
+# X2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.
+# X8. Age (years).
+# X9. Diabetes (0=no or 1=yes).
+
+glm_diabete <- glm(X9 ~ X2 + X8, data_PIdiabetes, family = binomial)
+
+fit <- ifelse(fitted(glm_diabete) >= 0.5, 1, 0)
+
+glm_diabete$coefficients
+
+tq1 <- table(fit, data_PIdiabetes$X9)
+tq1
+# confusion matrix
+1 - (sum(diag(tq1)) / sum(tq1))
+# misclassification error
+
+
+data_PIdiabetes_q1 <- data_PIdiabetes
+data_PIdiabetes_q1$X10 <- factor(fit)
+
+ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour = "Predicted Diabetes (0=no or 1=yes)" )
+
+
+theta <- coef(glm_diabete)
+
+slope <- (-theta[3]) / theta[2]
+intercept <- (-theta[1] ) / (theta[2]) 
+
+ggplot(data = data_PIdiabetes_q1, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  geom_abline(slope = slope, intercept = intercept) +
+  
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)")
+
+
+fit_r02 <- ifelse(fitted(glm_diabete) >= 0.2, 1, 0)
+
+tr02 <- table(fit_r02, data_PIdiabetes$X9)
+tr02
+#confusion matrix
+1 - (sum(diag(tr02)) / sum(tr02))
+#misclassification error
+
+
+data_PIdiabetes_r02 <- data_PIdiabetes
+data_PIdiabetes_r02$X10 <- factor(fit_r02)
+
+slope <- (-theta[3]) / theta[2]
+intercept <- (-log(4) - theta[1] ) / (theta[2]) 
+
+ggplot(data = data_PIdiabetes_r02, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  geom_abline(slope = slope, intercept = intercept) +
+  
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)", title = "r = 0.2" )
+
+
+fit_r08 <- ifelse(fitted(glm_diabete) >= 0.8, 1, 0)
+
+
+tr08 <- table(fit_r08, data_PIdiabetes$X9)
+tr08
+#confusion matrix
+1 - (sum(diag(tr08)) / sum(tr08))
+#misclassification error
+
+data_PIdiabetes_r08 <- data_PIdiabetes
+data_PIdiabetes_r08$X10 <- factor(fit_r08)
+
+slope <- (-theta[3]) / theta[2]
+intercept <- (log(4) - theta[1] ) / (theta[2]) 
+
+ggplot(data = data_PIdiabetes_r08, aes(x = X8, y = X2, colour = X10)) + 
+  geom_point() + 
+  geom_abline(slope = slope, intercept = intercept) +
+  
+  labs(x = "Age (years)", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)", title = "r = 0.8" )
+
+242/(242+25)
+231/(231+36)
+data_PIdiabetes_q5 <-  data_PIdiabetes %>%  select(c(X2,X8,X9))
+# X2,X8,X9
+# 2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test.
+# 8. Age (years).
+# 9. Diabetes (0=no or 1=yes).
+
+data_PIdiabetes_q5$Z1 <- data_PIdiabetes_q5$X2^4
+data_PIdiabetes_q5$Z2 <- data_PIdiabetes_q5$X2^3 * data_PIdiabetes_q5$X8^1
+data_PIdiabetes_q5$Z3 <- data_PIdiabetes_q5$X2^2 * data_PIdiabetes_q5$X8^2
+data_PIdiabetes_q5$Z4 <- data_PIdiabetes_q5$X2^1 * data_PIdiabetes_q5$X8^3
+data_PIdiabetes_q5$Z5 <- data_PIdiabetes_q5$X8^4
+
+glm_diabete_q5 <- glm(X9 ~ X2 + X8 + Z1 + Z2 + Z3 + Z4 + Z5, data_PIdiabetes_q5, family = binomial)
+
+fit <- ifelse(fitted(glm_diabete_q5) >= 0.5, 1, 0)
+
+tq5 <- table(fit, data_PIdiabetes_q5$X9)
+tq5
+# confusion matrix
+1 - (sum(diag(tq5)) / sum(tq5))
+# misclassification error
+
+data_PIdiabetes_q5$X10 <- factor(fit)
+
+ggplot(data = data_PIdiabetes_q5, aes(x = X8, y = X2, colour = X10)) +
+  geom_point() +
+  labs(x = "Age", y = "Plasma glucose concentration",
+       colour  = "Predicted Diabetes (0=no or 1=yes)")
+
+
+```
+
