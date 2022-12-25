@@ -329,8 +329,8 @@ plot(TPR_GLM,P_GLM, main = "precision recall curve for GLM")
 
 From the ROC curves, we may think all of these models perform better, when we
 lower the threshold for predicting "positive". Although FPR increases because of
-this, the TPR increases more. But what we really care about is the accuracy of 
+this, the TPR increases more. But what we really care about is the precision of 
 making a "positive" prediction. From the RP curves, we can see as the threshold
-lower and lower, the accuracy decreases in general. This is not what we want.
+lower and lower, the  decreases in general. This is not what we want.
 So, we can draw a conclusion RP curves can reflect what we really care about and 
 therefore a better choice compared to ROC.
