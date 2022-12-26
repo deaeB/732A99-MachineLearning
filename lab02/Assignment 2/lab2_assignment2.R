@@ -63,13 +63,9 @@ result_table
 
 
 # task3
-map <- data.frame(leave_numbers = rep(0,49), train_de = rep(0,49),
-                  valid_de = rep(0,49))
-
-# test_tree_pruned <- prune.tree(tree_third,best = 2)
-# test_predict_train_new <- predict(test_tree_pruned, type = "tree",newdata = data_train)
-# test_deviance <- deviance(test_predict_train_new)
-
+leave_numbers <- NULL
+train_de <- NULL
+valid_de <- NULL
 
 i <- 1
 while(i < 50){
@@ -77,21 +73,21 @@ while(i < 50){
   predict_train_new <- predict(tree_pruned, type = "tree",newdata = data_train)
   predict_valid_new <- predict(tree_pruned, type = "tree", newdata = data_validation)
 
-  map[i,"leave_numbers"] <- i + 1
-  map[i,"train_de"] <- deviance(predict_train_new)
-  map[i,"valid_de"] <- deviance(predict_valid_new)
+  leave_numbers[i] <- i + 1
+  train_de[i] <- deviance(predict_train_new)
+  valid_de[i] <- deviance(predict_valid_new)
 
   i <- i + 1
 }
 
-
-index <- order(map$valid_de)[1]
-leave_number <- map$leave_numbers[index]
+data_deviance <- data.frame(leave_numbers, train_de, valid_de)
+index <- order(valid_de)[1]
+leave_number <- leave_numbers[index]
 
 
 # plot
 library(reshape2)
-melt_map <- melt(map, id.vars = "leave_numbers")
+melt_map <- melt(data_deviance, id.vars = "leave_numbers")
 
 library(ggplot2)
 ggplot(data = melt_map, aes(x = leave_numbers, y = value, color = variable)) +
@@ -150,71 +146,66 @@ cat("F1 score:",F1_2,"\naccuracy:",accuracy_2)
 
 lr <- glm(y~.,data = data_train,family = "binomial")
 predict_test_3 <- predict(lr, newdata = data_test, type = "response")
-predict_test_4 <- predict(optimal_tree, newdata = data_test,
-                          type = "vector")[,"yes"]
-
+predict_test_4_temp <- predict(optimal_tree, newdata = data_test,
+                          type = "vector")
+predict_test_4 <- as.data.frame(predict_test_4_temp)$yes
 
 threshold <- seq(0.05,0.95,0.05)
 
-TPR_TREE <- c()
-FPR_TREE <- c()
-
-TPR_GLM <- c()
-FPR_GLM <- c()
-
-P_TREE <- c()
-P_GLM <- c()
+# TREE part
+TPR1 <- NULL
+FPR1 <- NULL
+P1 <- NULL
 
 for (i in threshold) {
-  positive_predicted <- predict_test_4 > i
-  positive_true <- data_test$y == "yes"
-  TP_TREE <- length(which((positive_predicted == positive_true) & positive_predicted == TRUE ))
 
-  negative_predicted <- predict_test_4 < i
-  negative_true <- data_test$y == "no"
-  TN_TREE <- length(which((negative_predicted == negative_true) & negative_predicted == TRUE ))
-
-
-  FP_TREE <- length(which((positive_predicted == negative_true) & positive_predicted == TRUE ))
-
-  FN_TREE <- length(which((negative_predicted == positive_true) & negative_predicted == TRUE ))
-
-  # the following is the GLM part
-  positive_predicted_2 <- predict_test_3 > i
-
-  TP_GLM <- length(which((positive_predicted_2 == positive_true) & positive_predicted_2 == TRUE ))
-
-  negative_predicted_2 <- predict_test_3 < i
-
-  TN_GLM <- length(which((negative_predicted_2 == negative_true) & negative_predicted_2 == TRUE ))
-
-
-  FP_GLM <- length(which((positive_predicted_2 == negative_true) & positive_predicted_2 == TRUE ))
-
-  FN_GLM <- length(which((negative_predicted_2 & positive_true) & negative_predicted_2 == TRUE ))
+  predicted <- ifelse(predict_test_4 > rep(i,13564), "yes","no")
+  TP1 <- length(which((predicted  == data_test$y) & predicted == "yes" ))
+  TN1 <-length(which((predicted  == data_test$y) & predicted == "no" ))
+  FP1 <- length(which((predicted != data_test$y) & predicted == "yes" ))
+  FN1 <- length(which((predicted != data_test$y) & predicted == "no" ))
 
   index <- i * 20
 
-  TPR_TREE[index] <- TP_TREE / (TP_TREE + FN_TREE)
-  FPR_TREE[index] <- FP_TREE / (TN_TREE + FP_TREE)
-  P_TREE[index] <- TP_TREE / (TP_TREE + FP_TREE)
+  TPR1[index] <- TP1 / (TP1 + FN1)
+  FPR1[index] <- FP1 / (TN1 + FP1)
+  P1[index] <- TP1 / (TP1 + FP1)
 
-
-  TPR_GLM[index] <- TP_GLM / (TP_GLM + FN_GLM)
-  FPR_GLM[index] <- FP_GLM / (TN_GLM + FP_GLM)
-  P_GLM[index] <- TP_GLM / (TP_GLM + FP_GLM)
 }
-data_roc_tree <- data.frame(FPR_TREE,TPR_TREE)
-data_roc_glm <- data.frame(FPR_GLM,TPR_GLM)
-ggplot(data_roc_tree,aes(x = FPR_TREE, y = TPR_TREE)) +
+
+# GLM part
+
+TPR2 <- NULL
+FPR2 <- NULL
+P2 <- NULL
+
+for (i in threshold) {
+
+  predicted_GLM <- ifelse(predict_test_3 > rep(i,13564), "yes","no")
+  TP2 <- length(which(predicted_GLM == data_test$y & predicted_GLM == "yes"))
+  TN2 <- length(which(predicted_GLM == data_test$y & predicted_GLM == "no"))
+  FP2<- length(which(predicted_GLM != data_test$y & predicted_GLM == "yes"))
+  FN2 <- length(which(predicted_GLM != data_test$y & predicted_GLM == "no"))
+
+  index <- i * 20
+
+  TPR2[index] <- TP2/ (TP2 + FN2)
+  FPR2[index] <- FP2 / (TN2 + FP2)
+  P2[index] <- TP2 / (TP2 + FP2)
+}
+
+
+
+data_roc_tree <- data.frame(FPR1,TPR1)
+data_roc_glm <- data.frame(FPR2,TPR2)
+ggplot(data_roc_tree,aes(x = FPR1, y = TPR1)) +
   geom_line(color = "red")  +
   xlim(0,1) + ylim(0,1) + labs(title = "Two ROC Curves for Two Models",
                                x = "FPR", y = "TPR")+
-  geom_line(data=data_roc_glm, aes(x = FPR_GLM, y = TPR_GLM), color = "blue")
+  geom_line(data=data_roc_glm, aes(x = FPR2, y = TPR2), color = "blue")
 
 
-# plot(FPR_TREE,TPR_TREE, main = "ROC curve for tree")
-# plot(FPR_GLM,TPR_GLM, main = "ROC curve for GLM")
-plot(TPR_TREE,P_TREE, main = "precision recall curve for tree")
-plot(TPR_GLM,P_GLM, main = "precision recall curve for GLM")
+
+plot(TPR1,P1, main = "precision recall curve for tree")
+plot(TPR2,P2, main = "precision recall curve for GLM")
 
