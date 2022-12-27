@@ -6,150 +6,157 @@ output:
   pdf_document: default
   html_document: default
 ---
+### contribution statement:
 
-### statement of contribution
-Jin Yan: part 1&2  
-Dongwei Ni: part 3
+Jin Yan was responsible for the first two parts of this assignment.
 
-## QUESTION ONE:1. KERNEL METHODS
+Dongwei Ni finished the third part of the assignment.
 
-For doing this assignments, we have to use kernels make predictions. The first 
-step for us to do is to get training data from the training data sets.
-```{r,eval=FALSE}
-set.seed(1234567890)
-library(geosphere)
+```{r library3, include=FALSE}
+library(neuralnet)
+library(dplyr)
 library(ggplot2)
-stations <- read.csv("stations.csv")
-temps <- read.csv("temps50k.csv")
-st <- merge(stations,temps,by="station_number")
+
+library(sigmoid)
+library(NeuralNetTools)
+library(geosphere)
+
 ```
 
-Then we need to create three functions to calculate three kinds of distances 
-between the point of interest and the training point. This is very important, 
-because according to the following formula, we have to get them every time we 
-want to get the kernel.
+## QUESTION ONE:1. KERNEL METHODS
+**Choose an appropriate smoothing coefficient or width for each of the three** 
+**kernels above.No cross-validation should be used. Instead, choose manually a** 
+**width that gives large kernel values to closer points and small values to** 
+**distant points. Show this with a plot of the kernel value as a function of** 
+**distance**
 
+In this task I choose h_distance = 600000,h_date = 300,h_time = 3. The following
+plots can prove these distances can satisfy the requirements giving in the 
+question(gives large kernel values to closer points and small values to distant 
+points).
 
+```{r echo=FALSE}
+set.seed(1234567890)
 
-Gaussian Kernel:
+stations <- read.csv("C:/Users/yj313/Desktop/LAB/732A99-MachineLearning/lab03/part1/stations.csv")
+temps <- read.csv("C:/Users/yj313/Desktop/LAB/732A99-MachineLearning/lab03/part1/temps50k.csv")
+st <- merge(stations,temps,by="station_number")
 
-![formula_1](formula_1.png)
+# create three functions to calculate three kinds of distances between the point of
+# interest and the training point.
 
-
-```{r,eval=FALSE}
+# distance_1 <- function(point1,point2){
+#   return(distHaversine(point1,as.matrix(point2,ncol = 2)))
+# }
 distance_1 <- function(point1,point2){
-  return(distHaversine(point1,as.matrix(point2,nol = 2)))
+  return(distHaversine(point1,point2))
 }
 
 distance_2 <- function(date1,date2){
-  days <- difftime(as.POSIXct(date1,format= "%Y-%m-%d"), 
-                   as.POSIXct(date2, format = "%Y-%m-%d"),units = "days")
+  days <- difftime(as.POSIXct(date1,format= "%Y-%m-%d"), as.POSIXct(date2, format = "%Y-%m-%d"),units = "days")
   return(as.numeric(days))
 }
 
 
 distance_3 <- function(time1,time2){
-  hours <- difftime(as.POSIXct(time1,format = "%H:%M:%S"), 
-                    as.POSIXct(time2,format = "%H:%M:%S"),units = "hours")
+  hours <- difftime(as.POSIXct(time1,format = "%H:%M:%S"), as.POSIXct(time2,format = "%H:%M:%S"),units = "hours")
   return(as.numeric(hours))
 }
-```
 
 
-Since we have get the functions used for calculating the distance, according to 
+# using plots to show widths chosen are appropriate
 
-the following formula, we can create a corresponding function "kernel_value"
+new_index <- sample(nrow(st))
+new_data <- st[new_index,]
+data_shown <- new_data[1:10,]
 
+# for the first width
 
-![formula_2](formula_2.png)
-
-
-```{r}
-kernel_value <- function(data1,data2,h_distance = 600000,
-                         h_date = 300, h_time = 3){
-  # the first kernel vector
-  data_1 <- as.numeric(data1[1:2])
-  data_2 <- data2[,4:5]
-  kernel_1 <- exp(- distance_1(data_1,data_2)^2 / (2 * h_distance^2) )
-
-  # the second kernel vector
-  data_1 <- data1[3]
-  data_2 <- data2[,9]
-  kernel_2 <- exp(- distance_2(data_1,data_2)^2 / (2 * h_date^2))
-
-  # the third kernel vector
-  data_1 <-data1[4]
-  data_2 <- data2[,10]
-  kernel_3 <- exp(- distance_3(data_1,data_2)^2 / (2 * h_time^2))
-
-  # conbine three kernels in different ways
-  k1 <- kernel_1 + kernel_2 + kernel_3
-  k2 <- kernel_1 * kernel_2 * kernel_3
-
-  # y_hat
-  yi <- data2[,11]
-  y_hat_1 <- sum(k1 * yi) / sum(k1)
-  y_hat_2 <- sum(k2 * yi) / sum(k2)
-
-  return(c(y_hat_1, y_hat_2))
-
-}
-```
-
-The final step is to use information given in the question to make prediction.
-Note that when we make prediction of one particular time on one day, we should 
-not ignore there are a lot of training data points that exist during the same 
-day. This is the main reason why we should combine two different parts to get 
-data2.
-
-```{r,eval=FALSE}
-day_times <- c("04:00:00","06:00:00","08:00:00","10:00:00","12:00:00","14:00:00"
-               ,"16:00:00","18:00:00","20:00:00","22:00:00","24:00:00")
-
-temp_one <- c()
-temp_two <- c()
-
-for(i in day_times){
-  data1 <- c(" 58.4274", "14.826", "2013-11-04",i)
-  # the training data consist of two parts, one part is data created before
-  # the date we want to predict for. Another part is that data we collected 
-  # during that day but not at the same time as that
-  # we want to predict for.
-  data2_part1 <- st[which(st$date < "2013-11-04"),]
-  data2_part2 <- st[which(st$date == "2013-11-04" && 
-                            distance_3(st$time,i) > 0),]
-  data2 <- rbind(data2_part1, data2_part2)
-
-  temp_one <- c(temp_one,kernel_value(data1,data2)[1])
-  temp_two <- c(temp_two,kernel_value(data1,data2)[2])
-
+new_data_1 <-  c(" 58.4274", "14.826", "2013-11-04","08:00:00")
+h_distance <- 600000
+distance <- NULL
+for(i in 1:10){
+  distance_temp <- distance_1(as.numeric(new_data_1[1:2]),data_shown[i,4:5])
+  distance <- c(distance,distance_temp)
 }
 
+order_ascend <- order(distance)
+data_distance_1 <- data_shown[order_ascend,]
+
+kernel_distance_1 <- NULL
+
+for (i in 1:10) {
+  kernel_distance_1_temp <- exp(-distance_1(as.numeric(new_data_1[1:2]),data_distance_1[i,4:5])^2 / (2 * h_distance^2))
+  kernel_distance_1 <- c(kernel_distance_1,kernel_distance_1_temp)
+}
+
+plot(1:10,kernel_distance_1,main = "the plot for h_distance = 600000")
 
 
-data_plot <- data.frame(times = day_times, temp_1=temp_one, temp_2=temp_two)
+# for second width
 
-plot1 <- ggplot(data_plot, aes(x = times, y = temp_one)) + geom_point() + 
-  xlab("time") + ylab("temperature") +
-  labs(title = "the kernel is the sum of the three kernels")
+new_data_2 <-  c("58.4274", "14.826", "2013-11-04","08:00:00")
+h_date <- 300
+distance <- NULL
+for(i in 1:10){
+  distance_temp <- distance_2(new_data_2[3],data_shown[i,9])
+  distance <- c(distance,distance_temp)
+}
+
+order_ascend <- order(distance)
+data_distance_2 <- data_shown[order_ascend,]
+
+kernel_distance_2 <- NULL
+
+for (i in 1:10) {
+  kernel_distance_2_temp <- exp(-distance_2(new_data_2[3],data_distance_2[i,9])^2 / (2 * h_date^2))
+  kernel_distance_2 <- c(kernel_distance_2,kernel_distance_2_temp)
+}
+
+plot(1:10,kernel_distance_2,main = "the plot for h_date = 300")
 
 
-plot2 <- ggplot(data_plot,aes(x = times, y = temp_two)) + geom_point() + 
-  xlab("time") + ylab("temperature") +
-  labs(title ="the kernel is the multiply of the three kernels")
+# for thrid width
 
-plot1
-plot2
+new_data_3 <-  c("58.4274", "14.826", "2013-11-04","08:00:00")
+h_time <- 3
+distance <- NULL
+for(i in 1:10){
+  distance_temp <- distance_3(new_data_2[4],data_shown[i,10])
+  distance <- c(distance,distance_temp)
+}
+
+order_ascend <- order(abs(distance))
+data_distance_3 <- data_shown[order_ascend,]
+
+kernel_distance_3 <- NULL
+
+for (i in 1:10) {
+  kernel_distance_3_temp <- exp(-distance_3(new_data_3[4],data_distance_3[i,10])^2 / (2 * h_time^2))
+  kernel_distance_3 <- c(kernel_distance_3,kernel_distance_3_temp)
+}
+
+plot(1:10,kernel_distance_3,main = "the plot for h_time = 3")
 ```
+
+
+**the comparision between two ways of combining different kernels**
+
+combine kernels by summing them up
 
 ![the kernel is made by addition](Rplot1.png)
 *
 
+combine kernels by multipying them
+
 ![the kernel is made by multiplication](Rplot2.png)
 *
 
-By comparison we can see that when we use the latter kernel(that is made by 
-multiplication), the prediction result is more persuasive.
+From the two plots we can clearly see that the second prediction is better. I 
+think the main reason is relevant to this specific task. In this task, we use 
+different parts of input to create three kernels with one type of kernel instead
+of using all the parts of the input with more than one type kernel.
+
 
 
 ## 2. SUPPORT VECTOR MACHINES
@@ -190,17 +197,6 @@ To calculate the result of linear combination, we used the following formula.
 
 ![formula3](formula_5.png)
 *
-
-
-```{r library3, include=FALSE}
-library(neuralnet)
-library(dplyr)
-library(ggplot2)
-
-library(sigmoid)
-library(NeuralNetTools)
-```
-
 
 ## 3.NEURAL NETWORKS
 
@@ -319,8 +315,7 @@ ggplot(data = dfggplotQ3)+
 ```{r 3.4}
 NNtrain$weights
 
-sum(NNtrain$weights[[1]][[2]][which(NNtrain$weights[[1]][[1]][2,] >0) + 1,1]) +
-  NNtrain$weights[[1]][[2]][1,1]
+sum(NNtrain$weights[[1]][[2]][which(NNtrain$weights[[1]][[1]][2,] >0) + 1,1]) + NNtrain$weights[[1]][[2]][1,1]
 
 ```
 
@@ -364,30 +359,33 @@ points(tr[,2], tr[,1],col = "black", cex=2)
 
 
 
-
 ## APPENDIX
 
 **TASK1**
 
 ```{r,eval=FALSE}
-
 set.seed(1234567890)
 library(geosphere)
 library(ggplot2)
-stations <- read.csv("stations.csv")
-temps <- read.csv("temps50k.csv")
+stations <- read.csv("C:/Users/yj313/Desktop/LAB
+                     /732A99-MachineLearning/lab03/part1/stations.csv")
+temps <- read.csv("C:/Users/yj313/Desktop/LAB/
+                  732A99-MachineLearning/lab03/part1/temps50k.csv")
 st <- merge(stations,temps,by="station_number")
 
-# create three functions to calculate three kinds of distances between 
-# the point of interest and the training point.
+# create three functions to calculate three kinds of distances between the point
+# of interest and the training point.
 
+# distance_1 <- function(point1,point2){
+#   return(distHaversine(point1,as.matrix(point2,ncol = 2)))
+# }
 distance_1 <- function(point1,point2){
-  return(distHaversine(point1,as.matrix(point2,nol = 2)))
+  return(distHaversine(point1,point2))
 }
 
 distance_2 <- function(date1,date2){
   days <- difftime(as.POSIXct(date1,format= "%Y-%m-%d"), 
-                   as.POSIXct(date2, format = "%Y-%m-%d"),units = "days")
+                   as.POSIXct(date2,format = "%Y-%m-%d"),units = "days")
   return(as.numeric(days))
 }
 
@@ -399,71 +397,162 @@ distance_3 <- function(time1,time2){
 }
 
 
-kernel_value <- function(data1,data2,h_distance = 600000,
-                         h_date = 300, h_time = 3){
-  # the first kernel vector
-  data_1 <- as.numeric(data1[1:2])
-  data_2 <- data2[,4:5]
-  kernel_1 <- exp(- distance_1(data_1,data_2)^2 / (2 * h_distance^2) )
+# using plots to show widths chosen are appropriate
 
-  # the second kernel vector
-  data_1 <- data1[3]
-  data_2 <- data2[,9]
-  kernel_2 <- exp(- distance_2(data_1,data_2)^2 / (2 * h_date^2))
+new_index <- sample(nrow(st))
+new_data <- st[new_index,]
+data_shown <- new_data[1:10,]
 
-  # the third kernel vector
-  data_1 <-data1[4]
-  data_2 <- data2[,10]
-  kernel_3 <- exp(- distance_3(data_1,data_2)^2 / (2 * h_time^2))
+# for the first width
 
-  # conbine three kernels in different ways
-  k1 <- kernel_1 + kernel_2 + kernel_3
-  k2 <- kernel_1 * kernel_2 * kernel_3
+new_data_1 <-  c(" 58.4274", "14.826", "2013-11-04","08:00:00")
+h_distance <- 600000
+distance <- NULL
+for(i in 1:10){
+  distance_temp <- distance_1(as.numeric(new_data_1[1:2]),data_shown[i,4:5])
+  distance <- c(distance,distance_temp)
+}
 
-  # y_hat
-  yi <- data2[,11]
-  y_hat_1 <- sum(k1 * yi) / sum(k1)
-  y_hat_2 <- sum(k2 * yi) / sum(k2)
+order_ascend <- order(distance)
+data_distance_1 <- data_shown[order_ascend,]
 
-  return(c(y_hat_1, y_hat_2))
+kernel_distance_1 <- NULL
+
+for (i in 1:10) {
+  kernel_distance_1_temp <- exp(-distance_1(as.numeric(new_data_1[1:2]),
+                                data_distance_1[i,4:5])^2 / (2 * h_distance^2))
+  kernel_distance_1 <- c(kernel_distance_1,kernel_distance_1_temp)
+}
+
+plot(1:10,kernel_distance_1,main = "the plot for h_distance = 600000")
+
+
+# for second width
+
+new_data_2 <-  c("58.4274", "14.826", "2013-11-04","08:00:00")
+h_date <- 300
+distance <- NULL
+for(i in 1:10){
+  distance_temp <- distance_2(new_data_2[3],data_shown[i,9])
+  distance <- c(distance,distance_temp)
+}
+
+order_ascend <- order(distance)
+data_distance_2 <- data_shown[order_ascend,]
+
+kernel_distance_2 <- NULL
+
+for (i in 1:10) {
+  kernel_distance_2_temp <- exp(-distance_2(new_data_2[3],
+                                      data_distance_2[i,9])^2 / (2 * h_date^2))
+  kernel_distance_2 <- c(kernel_distance_2,kernel_distance_2_temp)
+}
+
+plot(1:10,kernel_distance_2,main = "the plot for h_date = 300")
+
+
+# for thrid width
+
+new_data_3 <-  c("58.4274", "14.826", "2013-11-04","08:00:00")
+h_time <- 3
+distance <- NULL
+for(i in 1:10){
+  distance_temp <- distance_3(new_data_2[4],data_shown[i,10])
+  distance <- c(distance,distance_temp)
+}
+
+order_ascend <- order(abs(distance))
+data_distance_3 <- data_shown[order_ascend,]
+
+kernel_distance_3 <- NULL
+
+for (i in 1:10) {
+  kernel_distance_3_temp <- exp(-distance_3(new_data_3[4],
+                                      data_distance_3[i,10])^2 / (2 * h_time^2))
+  kernel_distance_3 <- c(kernel_distance_3,kernel_distance_3_temp)
+}
+
+plot(1:10,kernel_distance_3,main = "the plot for h_time = 3")
+
+
+
+
+
+predicted_temp <- function(data1,data2,h_distance = 600000,
+                           h_date = 300, h_time = 3){
+  n <- nrow(data2)
+  nominator<- NULL
+  denominator <- NULL
+
+  nominator_2 <- NULL
+  denominator_2 <- NULL
+
+  for(i in 1:n){
+    kernel_1 <- exp(-distance_1(as.numeric(data1[1:2]),
+                                   data2[i,4:5])^2 / (2 * h_distance^2))
+    kernel_2 <- exp(-distance_2(data1[3],data2[i,9])^2 / (2 * h_date^2))
+    kernel_3 <- exp(-distance_3(data1[4],data2[i,10])^2 / (2 * h_time^2))
+
+    kernel_real <- kernel_1 * kernel_2 * kernel_3
+    nominator_temp <- kernel_real * data2[i,11]
+    denominator_temp <- kernel_real
+    nominator <- c(nominator,nominator_temp)
+    denominator <- c(denominator,denominator_temp)
+
+    kernel_real_2 <- kernel_1 +  kernel_2 + kernel_3
+    nominator_temp_2 <- kernel_real_2 * data2[i,11]
+    denominator_temp_2 <- kernel_real_2
+    nominator_2 <- c(nominator_2,nominator_temp_2)
+    denominator_2 <- c(denominator_2,denominator_temp_2)
+  }
+  y_hat <- sum(nominator) /sum(denominator)
+  y_hat_2 <- sum(nominator_2) /sum(denominator_2)
+  return(c(y_hat,y_hat_2))
 
 }
 
+latitude <- rep("58.4274",11)
+longitude <- rep("14.826",11)
+date <- rep("2013-11-04",11)
 day_times <- c("04:00:00","06:00:00","08:00:00","10:00:00","12:00:00","14:00:00"
                ,"16:00:00","18:00:00","20:00:00","22:00:00","24:00:00")
+table <- data.frame(latitude,longitude,date,day_times)
 
-temp_one <- c()
-temp_two <- c()
+temperature_one <- NULL
+temperature_two <- NULL
 
-for(i in day_times){
-  data1 <- c(" 58.4274", "14.826", "2013-11-04",i)
+for(i in 1:11){
+  data_interest <- as.vector(table[i,])
   # the training data consist of two parts, one part is data created before
   # the date we want to predict for. Another part is that data we collected 
-  # during that day but not at the same time as that we want to predict for.
-  data2_part1 <- st[which(st$date < "2013-11-04"),]
-  data2_part2 <- st[which(st$date == "2013-11-04" && distance_3(st$time,i) > 0),]
-  data2 <- rbind(data2_part1, data2_part2)
+  # during that day but not at the same time as that
+  # we want to predict for.
 
-  temp_one <- c(temp_one,kernel_value(data1,data2)[1])
-  temp_two <- c(temp_two,kernel_value(data1,data2)[2])
-
+  data_needed_part1 <- st[which(st$date < "2013-11-04"),]
+  data_needed_part2 <- st[which(st$date == "2013-11-04" & 
+                                  distance_3(st$time,data_interest[[4]]) < 0),]
+  data_needed <- rbind(data_needed_part1, data_needed_part2)
+  
+  temperature_combination <-predicted_temp(c(data_interest[[1]],
+          data_interest[[2]],data_interest[[3]],data_interest[[4]]),data_needed)
+  
+  temperature_one <-c(temperature_one,temperature_combination[2])
+  temperature_two <-c(temperature_two,temperature_combination[1])
 }
 
 
+data_plot1 <- data.frame(day_times, temperature_one)
+data_plot2 <- data.frame(day_times, temperature_two) 
 
-data_plot <- data.frame(times = day_times, temp_1=temp_one, temp_2=temp_two)
-
-plot1 <- ggplot(data_plot, aes(x = times, y = temp_one)) + geom_point() + 
-  xlab("time") + ylab("temperature")
-
-
-
-plot2 <- ggplot(data_plot,aes(x = times, y = temp_two)) + geom_point() + 
-  xlab("time") + ylab("temperature")
+plot1 <- ggplot(data_plot1, aes(x = day_times, y = temperature_one)) + 
+  geom_point() + 
+  xlab("time") + ylab("temperature") +labs(title = "sum of kernels")
+plot2 <- ggplot(data_plot2,aes(x = day_times, y = temperature_two)) + 
+  geom_point() + 
+ xlab("time") + ylab("temperature")+labs(title = "the mutiplication of kernels")
 
 plot1
 plot2
-
 
 
 ```
@@ -561,8 +650,7 @@ ggplot(data = data, aes( x = x, y = y)) + geom_point(color = "blue", size = 3) +
 ```
 
 **TASK3**
-
-```{r Appendix code3, eval=FALSE}
+```{r Appendix, eval=FALSE}
 library(neuralnet)
 library(dplyr)
 library(ggplot2)
@@ -651,7 +739,8 @@ ggplot(data = dfggplotQ3)+
   labs(x = "data point", y = "sin value")
 
 NNtrain$weights
-# sigmoid((c(1,9.10836573)%*% NNtrain$weights[[1]][[1]])) %*% NNtrain$weights[[1]][[2]][2:11] + NNtrain$weights[[1]][[2]][1]
+# sigmoid((c(1,9.10836573)%*% NNtrain$weights[[1]][[1]])) %*% 
+NNtrain$weights[[1]][[2]][2:11] + NNtrain$weights[[1]][[2]][1]
 # plot(NNtrain)
 
 sum(NNtrain$weights[[1]][[2]][which(NNtrain$weights[[1]][[1]][2,] >0) + 1,1]) +
