@@ -11,6 +11,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Assignment 1
+
 ```{r library, include=FALSE}
 library(tidyverse)
 library(ggplot2)
@@ -441,7 +443,7 @@ library(tidyverse)
 library(ggplot2)
 ```
 
-
+## Assignment 3  
 
 ## Task 1
 
