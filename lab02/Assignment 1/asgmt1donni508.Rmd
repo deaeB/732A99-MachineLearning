@@ -36,6 +36,8 @@ pred_test <- predict(lm_fat, newdata = data1_test)
 err_train <- sum((pred_train - data1_train$Fat)^2) / (2*length(pred_train))
 err_test <- sum((pred_test - data1_test$Fat)^2) / (2*length(pred_test))
 
+err_train
+err_test
 ```
 
 - Overfitted! Works well on train set but can't fit the test set at all. We need a better method to predict Fat.
@@ -102,11 +104,12 @@ glm_train_lassoCV$lambda.min
 ```{r 1.5 scatterplot}
 pred_test_1se <- predict(glm_train_lassoCV, newx = as.matrix(data1_test[,2:101]))
 
-ggplot(data = data.frame(pred_test_1se, obs = data1_test[,102]))+
-  geom_point(aes(x = 1:nrow(data1_test), y = lambda.1se, color = "prediction"))+
+ggplot(data = data.frame(pred_test_1se, obs = data1_test[,102], origin = pred_test))+
+  geom_point(aes(x = 1:nrow(data1_test), y = lambda.1se, color = "prediction of optimal lambda"))+
   geom_point(aes(x = 1:nrow(data1_test), y = obs, color = "observation"))+
+  geom_point(aes(x = 1:nrow(data1_test), y = origin, color = "oringinal prediction"))+
   labs(x  = "ID of different samples", y = "Fat level")
 
 ```
 
-- We can see that the differences between points of observation and prediction value is close. So we consider it a good prediction.
+- We can see that the differences between points of observation and optimized prediction is close, and much more better than the origin predictions. So we consider the optimized one a good and better prediction.

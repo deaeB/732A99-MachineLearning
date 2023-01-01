@@ -58,9 +58,11 @@ lambda <- res$sdev^2
 screeplot(res)
 
 sort(abs(res$loadings[,1]), decreasing = TRUE)[1:5]
+
+plot(eigenS[["vectors"]][,1],ylab = "PC1")
 ```
 
-- Only 5 features have a variance which is greater than 5 and 2 features over 10 as we can seen in the plot, so we can consider that there isn't much features have a notable contribution  
+- Only 5 features have a variance which is greater than 5 and 2 features over 10 as we can seen in the plot, so we can consider that there isn't much features have a notable contribution. And from the trace plot of PC1, we can see that it's rather evenly distributed and few features contributes more then an absolute value of 0.15.  
 5 features contribute mostly:  
 medFamInc; medIncome; PctKids2Par; pctWInvInc; PctPopUnderPov  
 We can see that all these 5 features highly related to economic level, which may positively of negatively contrubute to the crime level.
