@@ -131,7 +131,7 @@ also corresponds to the data.
 For implementing the EM algorithm for Bernoulli mixture model
 First we generate a $\pi$ and $\mu$ of a Bernoulli mixture model
 
-```{r setting, echo=FALSE}
+```{r setting, echo=TRUE}
 set.seed(1234567890)
 max_it <- 100 # max number of EM iterations
 min_change <- 0.1 # min change in log lik between two consecutive iterations
@@ -158,7 +158,7 @@ for(i in 1:n) {
 And the plot above shows the 3 $\mu$s we are using to generate data set x, with a same $\pi = \frac13$ for each $\mu$, and of course with a $Dimension = 10$.
 
 
-```{r M2, echo=FALSE}
+```{r M2}
 set.seed(1234567890)
 M <- 2 # number of clusters
 w <- matrix(nrow=n, ncol=M) # weights ; p(y = m | xi,thetaHat)
@@ -177,11 +177,11 @@ mu
 
 First we start with cluster M = 2. And we generate a $\pi$ and $\mu$ under M = 2 as the start point for our model.
 
-```{r M2 loop, echo=FALSE, out.width = "50%", out.height = "50%"}
+```{r M2 loop, out.height="50%", out.width="50%"}
 set.seed(1234567890)
 iterLog <- vector(length = max_it)
 for(it in 1:max_it) {
-  plot(mu[1,], type="o", col="blue", ylim=c(0,1))
+  plot(mu[1,], type="o", col="blue", ylim=c(0,1), ylab = paste("mu, iteration", it))
   points(mu[2,], type="o", col="red")
   # points(mu[3,], type="o", col="green")
   #points(mu[4,], type="o", col="yellow")
@@ -247,12 +247,11 @@ plot(llik[1:it], type="o")
 
 ```
 
-From the plots above. We can see that under this situation, $\mu$ which is equal to 0.5 every dimension seems did not being reflect. It might be that the other 2 $\mu$s are symmetrical to the 0.5 axis.  
-And for every iteration the predicted $\mu$ is closer and closer to the $true \ \mu$. The rapidly raise of log-likelihood during iteration 5-7 is also reflect by the plot from significant changing of $\mu$ in corresponding iterations.
-The final predicted  $\mu$ shows above is relatively close to the true value within around 10% differences.
+From the plots above, and comparing it with the plot of $ture\ \mu$. We can see that under this situation, the red and blue $ture\ \mu$ is in a sense shown by the red and blue $predicted\ \mu$. While the green $ture\ \mu$, which is $p = 0.5$ in all dimensions, disappeared in the plot of $predicted\ \mu$, and green $ture\ \mu$'s impact on dataset generation might be represented by the remaining 2 $predicted\ \mu$s. 
+ The rapidly raise of log-likelihood during iteration 5-7 is also reflect by the plot from significant changing of $\mu$ in corresponding iterations.
 
 
-```{r M3, echo=FALSE}
+```{r M3, echo=TRUE}
 set.seed(1234567890)
 M <- 3 # number of clusters
 w <- matrix(nrow=n, ncol=M) # weights ; p(y = m | xi,thetaHat)
@@ -271,12 +270,12 @@ mu
 
 Then we goes to M = 3, again generate a $\pi$ and $\mu$ under M = 3 as the start point for our model.
 
-```{r M3 loop, echo=FALSE, out.width = "25%", out.height = "25%"}
+```{r M3 loop, echo=TRUE, out.width = "25%", out.height = "25%"}
 iterLog <- vector(length = max_it)
 for(it in 1:max_it) {
     # plotChoose <- c(1, 5, 6, 12, 24)
   # if (it == any(plotChoose)) {
-    plot(mu[1,], type="o", col="blue", ylim=c(0,1))
+    plot(mu[1,], type="o", col="blue", ylim=c(0,1), ylab = paste("mu, iteration", it))
     points(mu[2,], type="o", col="red")
     points(mu[3,], type="o", col="green")
     # points(mu[4,], type="o", col="yellow")
@@ -339,7 +338,7 @@ for(it in 1:max_it) {
 
 ```
 
-```{r M3 print, echo=FALSE, out.height="50%", out.width="50%"}
+```{r M3 print, echo=TRUE, out.height="50%", out.width="50%"}
 print(iterLog[1:it])
 pi
 mu
@@ -350,7 +349,7 @@ plot(llik[1:it], type="o")
 We can see that the log-likelihood rises rapidly during iteration 4-7, its also clearly shown by $\mu$ values plot. Then from final result we can see that it predict the true values well, especially in comparison with following M = 4.
 
 
-```{r M4, echo=FALSE}
+```{r M4, echo=TRUE}
 set.seed(1234567890)
 M <- 4 # number of clusters
 w <- matrix(nrow=n, ncol=M) # weights ; p(y = m | xi,thetaHat)
@@ -369,12 +368,12 @@ mu
 
 Then we change M to 4, again generate a $\pi$ and $\mu$ under M = 4 as the start point for our model.
 
-```{r M4 loop, echo=FALSE, out.height="25%", out.width="25%"}
+```{r M4 loop, echo=TRUE, out.height="25%", out.width="25%"}
 iterLog <- vector(length = max_it)
 for(it in 1:max_it) {
   # plotChoose <- c(1, 15, 43)
   # if (it == any(plotChoose)) {
-    plot(mu[1,], type="o", col="blue", ylim=c(0,1))
+    plot(mu[1,], type="o", col="blue", ylim=c(0,1), ylab = paste("mu, iteration", it))
     points(mu[2,], type="o", col="red")
     points(mu[3,], type="o", col="green")
     points(mu[4,], type="o", col="yellow")
@@ -436,7 +435,7 @@ for(it in 1:max_it) {
 }
 ```
 
-```{r M4 print, echo=FALSE, out.height="50%", out.width="50%"}
+```{r M4 print, echo=TRUE, out.height="50%", out.width="50%"}
 print(iterLog[1:it])
 pi
 mu
@@ -445,7 +444,7 @@ plot(llik[1:it], type="o")
 ```
 
 
-We can see that after the rapid rising of log-likelihood, the iteration 8-15 seems still have a reasonable $\mu$ value, but then it falls into overfitting and the result $\mu$ and $\pi$ values seems not so favorable.
+We can see that after the rapid rising of log-likelihood, the iteration 8-15 seems still have a reasonable $\mu$ patterns, but then it falls into a pattern that harder to be interpreted. Seems the plot of $predicted\ \mu$s is no longer emulating the pattern of $true\ \mu$s, but trying to model the dataset in its own M=4 way.
 
 
 
@@ -493,7 +492,7 @@ mu
 set.seed(1234567890)
 iterLog <- vector(length = max_it)
 for(it in 1:max_it) {
-  plot(mu[1,], type="o", col="blue", ylim=c(0,1))
+  plot(mu[1,], type="o", col="blue", ylim=c(0,1), ylab = paste("mu, iteration", it))
   points(mu[2,], type="o", col="red")
   # points(mu[3,], type="o", col="green")
   #points(mu[4,], type="o", col="yellow")
