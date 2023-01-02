@@ -1,14 +1,12 @@
-
-
-
-data3 <- read.csv("communities.csv")
+library(tidyverse)
+data3 <- read.csv("C:/Users/yj313/Desktop/LAB/732A99-MachineLearning/lab02/Assignment 3/communities.csv",sep = ",")
 set.seed(12345)
 
 # 1 ####
 data3_full <- data3
 
-data3_full[-ncol(data3_full)] <- 
-    data3_full %>% 
+data3_full[-ncol(data3_full)] <-
+    data3_full %>%
       select( !ViolentCrimesPerPop) %>%
       apply( 2, scale)
 
@@ -46,7 +44,7 @@ screeplot(res)
 
 sort(abs(res$loadings[,1]), decreasing = TRUE)[1:5]
 # Report which 5 features contribute mostly (by the absolute value) to the first principle component
-# medFamInc      medIncome    PctKids2Par     pctWInvInc PctPopUnderPov 
+# medFamInc      medIncome    PctKids2Par     pctWInvInc PctPopUnderPov
 
 # all highly related to economic level
 
@@ -90,8 +88,8 @@ fun_cost <- function(theta, dataIn){
   y_hat <- theta %*% t(as.matrix(dataIn[,1:100]))
   y <- dataIn[,101]
   cost <- sum((y_hat - y)^2) / n
-  
-  
+
+
   pred_train_liklihood <- theta %*% t(data3_train_scale[,1:100])
   pred_test_liklihood <- theta %*% t(data3_test_scale[,1:100])
   i <<- i+1
@@ -121,12 +119,12 @@ ggplot(data = data.frame(err_train_liklihood_optimed, err_test_liklihood_optimed
   ) +
   # scale_color_manual(
   #   name = "shape1",
-  #   values = c('red' = 'red', "black" = 'black'), 
+  #   values = c('red' = 'red', "black" = 'black'),
   #   breaks = c("red", "black"),
   #   labels = c('train error', 'test error')
   # ) +
   scale_shape_manual(
-    values = c("train error" = 16, "test error" = 17), 
+    values = c("train error" = 16, "test error" = 17),
     labels = c('train error', 'test error'),
   )
 
@@ -136,7 +134,7 @@ ggplot(data = data.frame(err_train_liklihood_optimed, err_test_liklihood_optimed
 # err_test_liklihood <- c()
 # theta_hat_iteration <- theta0
 # for (i in 1:250) {
-#   theta_hat_iteration_optim <- 
+#   theta_hat_iteration_optim <-
 #     optim(
 #       par = theta_hat_iteration,
 #       fn = fun_cost,

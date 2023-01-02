@@ -26,22 +26,22 @@ Results are given below.
 The relevant code is added in Appendix
 
 mean_mis_rate1
-0.206625
+0.205101
 
 mean_mis_rate10
-0.137777
+0.122574
 
 mean_mis_rate100
-0.112063
+0.077882
 
 var_mis_rate1
-0.003044475
+0.002805146
 
 var_mis_rate10
-0.000964694
+0.0008313639
 
 var_mis_rate100
-0.0008307177
+0.0004518479
 
 
 
@@ -50,44 +50,45 @@ var_mis_rate100
 The relevant code is added in Appendix
 
 mean_mis_rate1
-0.09753
+0.093459
 
 mean_mis_rate10
-0.016116
+0.010777
 
 mean_mis_rate100
-0.006754
+0.006265
 
 var_mis_rate1
-0.01870012
+0.01690613
 
 var_mis_rate10
-0.0006982528
+0.0001199092
 
 var_mis_rate100
-7.64119e-05
+2.553328e-06
 
 *TASK THREE*
 
 The relevant code is added in Appendix
 
 mean_mis_rate1
-0.245286
+0.213347
 
 mean_mis_rate10
-0.120254
+0.077935
 
 mean_mis_rate100
-0.07359
+0.034172
 
 var_mis_rate1
-0.01369812
+0.01461418
 
 var_mis_rate10
-0.002829063
+0.001286011
 
 var_mis_rate100
-0.001203491
+1.389431e-05
+
 
 *TASK FOUR*
 **1.What happens with the mean error rate when the number of trees in the random** 
@@ -745,21 +746,21 @@ test_data <- as.data.frame(tedata)
 test_data <- dplyr::mutate(test_data,telabels)
 
 
+
+x1<-runif(100)
+x2<-runif(100)
+trdata<-cbind(x1,x2)
+y<-as.numeric(x1<x2)
+trlabels<-as.factor(y)
+train_data <- as.data.frame(trdata)
+train_data <- dplyr::mutate(train_data,trlabels)
+
 # QUESTION ONE PART ONE
 mis_rate1 <- c()
 for(i in 1:1000){
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(x1<x2)
-  trlabels<-as.factor(y)
 
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
   Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1
-                                         , nodesize = 25, keep.forest = TRUE)
+                                         ,nodesize = 25, keep.forest = TRUE)
   pre <- predict(Forest_1,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
   mis_rate1 <- c(mis_rate1,misclassification_rate)
@@ -777,18 +778,8 @@ var_mis_rate1
 mis_rate10 <- c()
 for(i in 1:1000){
 
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(x1<x2)
-  trlabels<-as.factor(y)
-
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 
-                                          10, nodesize = 25, keep.forest = TRUE)
+  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, ntree =
+                                        10, nodesize = 25, keep.forest = TRUE)
   pre <- predict(Forest_10,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
   mis_rate10 <- c(mis_rate10,misclassification_rate)
@@ -809,18 +800,8 @@ var_mis_rate10
 mis_rate100 <- c()
 for(i in 1:1000){
 
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(x1<x2)
-  trlabels<-as.factor(y)
-
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, 
-                        ntree = 100, nodesize = 25, keep.forest = TRUE)
+  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data,
+                                ntree = 100, nodesize = 25, keep.forest = TRUE)
   pre <- predict(Forest_100,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
   mis_rate100 <- c(mis_rate100,misclassification_rate)
@@ -846,7 +827,13 @@ telabels<-as.factor(y)
 test_data <- as.data.frame(tedata)
 test_data <- dplyr::mutate(test_data,telabels)
 
-
+x1<-runif(100)
+x2<-runif(100)
+trdata<-cbind(x1,x2)
+y<-as.numeric(x1<0.5)
+trlabels<-as.factor(y)
+train_data <- as.data.frame(trdata)
+train_data <- dplyr::mutate(train_data,trlabels)
 
 
 
@@ -855,16 +842,7 @@ test_data <- dplyr::mutate(test_data,telabels)
 # QUESTION TWO PART ONE
 mis_rate1 <- c()
 for(i in 1:1000){
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(x1<0.5)
-  trlabels<-as.factor(y)
 
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
   Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, ntree = 1
                                          , nodesize = 25, keep.forest = TRUE)
   pre <- predict(Forest_1,newdata = test_data)
@@ -884,17 +862,7 @@ var_mis_rate1
 mis_rate10 <- c()
 for(i in 1:1000){
 
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(x1<0.5)
-  trlabels<-as.factor(y)
-
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, 
+  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data,
                                 ntree = 10, nodesize = 25, keep.forest = TRUE)
   pre <- predict(Forest_10,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
@@ -912,18 +880,7 @@ var_mis_rate10
 # QUESTION tWO PART THREE
 mis_rate100 <- c()
 for(i in 1:1000){
-
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(x1<0.5)
-  trlabels<-as.factor(y)
-
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, 
+  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data,
                               ntree = 100, nodesize = 25, keep.forest = TRUE)
   pre <- predict(Forest_100,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
@@ -952,20 +909,20 @@ telabels<-as.factor(y)
 test_data <- as.data.frame(tedata)
 test_data <- dplyr::mutate(test_data,telabels)
 
+
+x1<-runif(100)
+x2<-runif(100)
+trdata<-cbind(x1,x2)
+y<-as.numeric(((x1<0.5 & x2<0.5)|(x1>0.5 & x2>0.5)))
+trlabels<-as.factor(y)
+train_data <- as.data.frame(trdata)
+train_data <- dplyr::mutate(train_data,trlabels)
+
 # QUESTION THREE PART ONE
 mis_rate1 <- c()
 for(i in 1:1000){
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(((x1<0.5 & x2<0.5)|(x1>0.5 & x2>0.5)))
-  trlabels<-as.factor(y)
 
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data, 
+  Forest_1 <- randomForest::randomForest(trlabels~.,data = train_data,
                                 ntree = 1, nodesize = 12, keep.forest = TRUE)
   pre <- predict(Forest_1,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
@@ -985,17 +942,7 @@ var_mis_rate1
 mis_rate10 <- c()
 for(i in 1:1000){
 
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(((x1<0.5 & x2<0.5)|(x1>0.5 & x2>0.5)))
-  trlabels<-as.factor(y)
-
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data, 
+  Forest_10 <- randomForest::randomForest(trlabels~.,data = train_data,
                                 ntree = 10, nodesize = 12, keep.forest = TRUE)
   pre <- predict(Forest_10,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
@@ -1017,18 +964,8 @@ var_mis_rate10
 mis_rate100 <- c()
 for(i in 1:1000){
 
-  x1<-runif(100)
-  x2<-runif(100)
-  trdata<-cbind(x1,x2)
-  y<-as.numeric(((x1<0.5 & x2<0.5)|(x1>0.5 & x2>0.5)))
-  trlabels<-as.factor(y)
-
-
-
-  train_data <- as.data.frame(trdata)
-  train_data <- dplyr::mutate(train_data,trlabels)
-  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data, 
-                              ntree = 100, nodesize = 12, keep.forest = TRUE)
+  Forest_100 <- randomForest::randomForest(trlabels~.,data = train_data,
+                                ntree = 100, nodesize = 12, keep.forest = TRUE)
   pre <- predict(Forest_100,newdata = test_data)
   misclassification_rate <- mean(pre!=telabels)
   mis_rate100 <- c(mis_rate100,misclassification_rate)
@@ -1041,4 +978,3 @@ var_mis_rate100 <- var(mis_rate100)
 mean_mis_rate100
 var_mis_rate100
 ```
-

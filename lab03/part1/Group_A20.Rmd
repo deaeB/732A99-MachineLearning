@@ -163,6 +163,13 @@ of using all the parts of the input with more than one type kernel.
 
 **1. Which filter do we return to the user ? filter0, filter1, filter2 or** 
 **filter3? Why?**
+After calculation, we find that
+
+err0 =  0.0675 
+err1 =  0.08489388
+err2 =  0.082397
+err3 =  0.02122347
+
 The filter1 should be returned to the user. The main reason is the error is the 
 lowest, which means it has high precision, for making prediction.
 
@@ -173,7 +180,7 @@ lowest, which means it has high precision, for making prediction.
 I think err1 should be returned to the user. This is because the generalization
 error refers to the error we get when we use the mode to make prediction 
 according to new unseen data set. Only err1 is created in this way. Namely, we 
-use training data set to train the modeland then use test data set to make 
+use training data set to train the model and then use test data set to make 
 prediction.
 
 
